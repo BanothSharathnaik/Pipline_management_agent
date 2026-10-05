@@ -1,0 +1,10 @@
+doc_id: ERR-005
+doc_type: error_log
+source: mock
+title: Daily sales aggregation timed out
+job_id: j_sales
+run_id: r3002
+timestamp: 2026-10-02T04:30:00+00:00
+---
+Run exceeded timeout of 1800 seconds.
+The run was stopped by the scheduler and marked TIMED_OUT.

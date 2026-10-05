@@ -1,0 +1,9 @@
+doc_id: DQ-001
+doc_type: data_quality
+source: mock
+title: Null customer ids dropped by expectation
+timestamp: 2026-09-28T02:20:00+00:00
+---
+Pipeline customer_pipeline update completed. Expectation valid_customer_id was violated.
+Rows with a null customer_id were dropped from the target table.
+The update itself finished successfully.

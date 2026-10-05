@@ -1,0 +1,8 @@
+doc_id: TS-001
+doc_type: troubleshooting
+source: mock
+title: Investigating schema mismatch and missing columns
+---
+When a task fails with an unresolved column error, compare the column names the code expects with the table schema.
+Use DESCRIBE TABLE to list current columns. Check whether the source recently changed.
+Also check whether the upstream task wrote the expected schema.

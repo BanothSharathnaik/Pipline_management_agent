@@ -1,0 +1,8 @@
+doc_id: ERR-006
+doc_type: error_log
+source: mock
+title: Out of memory during join
+timestamp: 2026-09-20T03:15:00+00:00
+---
+java.lang.OutOfMemoryError: Java heap space
+Executor lost while running a large join stage. Increase memory or reduce shuffle size.

@@ -1,0 +1,8 @@
+doc_id: HIST-002
+doc_type: historical_failure
+source: mock
+title: Source column renamed upstream
+timestamp: 2026-07-18T00:00:00+00:00
+---
+The source system renamed a column. Jobs that still referenced the old column name failed with an unresolved column error.
+Fixed by updating the column reference in the transformation code.

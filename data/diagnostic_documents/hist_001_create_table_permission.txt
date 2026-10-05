@@ -1,0 +1,9 @@
+doc_id: HIST-001
+doc_type: historical_failure
+source: mock
+title: New service account could not create tables
+timestamp: 2026-08-12T00:00:00+00:00
+---
+A new service account failed with a permission error when writing to schema main.sales.
+The account had USE SCHEMA but no CREATE TABLE privilege.
+Resolved by granting CREATE TABLE on the schema to the service account.

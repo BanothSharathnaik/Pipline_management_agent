@@ -1,0 +1,10 @@
+doc_id: ERR-003
+doc_type: error_log
+source: mock
+title: Principal lacks privilege on customers table
+job_id: j_cust
+run_id: r2003
+timestamp: 2026-10-03T02:03:45+00:00
+---
+Run failed at the first task.
+PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers

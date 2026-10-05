@@ -1,0 +1,10 @@
+doc_id: ERR-004
+doc_type: error_log
+source: mock
+title: Cleaned orders table missing
+job_id: j_sales
+run_id: r3004
+timestamp: 2026-10-04T04:00:05+00:00
+---
+AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema and catalog.
+The run failed 5 seconds after it started.

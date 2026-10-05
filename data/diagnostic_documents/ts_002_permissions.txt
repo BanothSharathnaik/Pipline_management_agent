@@ -1,0 +1,9 @@
+doc_id: TS-002
+doc_type: troubleshooting
+source: mock
+title: Investigating permission errors
+---
+For permission denied errors, identify the principal the job runs as.
+Use SHOW GRANTS on the table to see which privileges exist.
+Missing SELECT, USE SCHEMA, or USE CATALOG privileges are common causes.
+Ask the table owner or an admin to grant access.

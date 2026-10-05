@@ -1,0 +1,8 @@
+doc_id: TS-003
+doc_type: troubleshooting
+source: mock
+title: Investigating long runs and timeouts
+---
+Compare the run duration with earlier successful runs of the same job.
+Check input data volume, skewed joins, and compute size.
+If a timeout is configured, confirm it matches the normal runtime plus a margin.

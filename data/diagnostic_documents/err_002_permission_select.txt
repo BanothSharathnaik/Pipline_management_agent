@@ -1,0 +1,11 @@
+doc_id: ERR-002
+doc_type: error_log
+source: mock
+title: Permission denied reading customers table
+job_id: j_cust
+run_id: r2002
+timestamp: 2026-10-02T02:03:30+00:00
+---
+Task ingest_customers failed.
+PermissionDenied: User does not have SELECT on table main.crm.customers
+Downstream tasks transform_customers and publish were skipped.

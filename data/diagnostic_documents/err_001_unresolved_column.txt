@@ -1,0 +1,11 @@
+doc_id: ERR-001
+doc_type: error_log
+source: mock
+title: Unresolved column in orders load
+job_id: j_orders
+run_id: r1004
+timestamp: 2026-10-04T01:02:15+00:00
+---
+Task load failed.
+AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the following? [`order_amount`, `order_id`]
+The task extract completed successfully before this failure.
