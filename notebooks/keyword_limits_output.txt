@@ -1,0 +1,67 @@
+[MOCK DATA] 12 documents indexed, 0 load issues
+
+=== A. control: exact wording
+query: 'permission denied main.crm.customers'
+look for: ERR-002 and ERR-003 on top
+  1. ERR-002   score=0.626  [error_log]  matched=['crm', 'customers', 'denied', 'main', 'permission']
+     Permission denied reading customers table
+  2. ERR-003   score=0.530  [error_log]  matched=['crm', 'customers', 'denied', 'main', 'permission']
+     Principal lacks privilege on customers table
+  3. TS-002    score=0.149  [troubleshooting]  matched=['denied', 'permission']
+     Investigating permission errors
+
+=== B. synonym: access/permission, customer/customers
+query: 'access denied for customer data'
+look for: is the right evidence on top, or an unrelated doc?
+  1. DQ-001    score=0.227  [data_quality]  matched=['customer']
+     Null customer ids dropped by expectation
+  2. TS-002    score=0.157  [troubleshooting]  matched=['access', 'denied']
+     Investigating permission errors
+  3. ERR-002   score=0.118  [error_log]  matched=['denied']
+     Permission denied reading customers table
+
+=== C. no shared words: slow vs timeout
+query: 'why is it so slow'
+look for: TS-003 / ERR-005 are relevant. Are they found?
+  (no results)
+
+=== D. no stemming: fail
+query: 'fail'
+look for: corpus only says 'failed'
+  (no results)
+
+=== D2. no stemming: failed
+query: 'failed'
+look for: compare with D
+  1. ERR-003   score=0.148  [error_log]  matched=['failed']
+     Principal lacks privilege on customers table
+  2. ERR-002   score=0.129  [error_log]  matched=['failed']
+     Permission denied reading customers table
+  3. HIST-002  score=0.122  [historical_failure]  matched=['failed']
+     Source column renamed upstream
+
+=== E. identifier split: different table
+query: 'SELECT denied on main.sales.customers'
+look for: ERR-002/003 are about main.crm.customers, a different table
+  1. ERR-002   score=0.505  [error_log]  matched=['customers', 'denied', 'main', 'select']
+     Permission denied reading customers table
+  2. ERR-003   score=0.439  [error_log]  matched=['customers', 'denied', 'main', 'select']
+     Principal lacks privilege on customers table
+  3. TS-002    score=0.127  [troubleshooting]  matched=['denied', 'select']
+     Investigating permission errors
+
+=== F. opposite meaning
+query: 'user has SELECT permission on customers'
+look for: query says the user HAS permission. What ranks first?
+  1. ERR-002   score=0.566  [error_log]  matched=['customers', 'permission', 'select', 'user']
+     Permission denied reading customers table
+  2. ERR-003   score=0.360  [error_log]  matched=['customers', 'permission', 'select']
+     Principal lacks privilege on customers table
+  3. TS-002    score=0.154  [troubleshooting]  matched=['permission', 'select']
+     Investigating permission errors
+
+=== G. out of scope
+query: 'how do I bake bread'
+look for: should return nothing
+  (no results)
+
