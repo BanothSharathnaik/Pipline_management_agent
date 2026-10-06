@@ -1,0 +1,31 @@
+[MOCK DATA] 12 chunks | min_score 0.15 is provisional (fitted to these 6 queries)
+
+'access denied for customer data': ok | best score 0.580 | kept 5, dropped low 0, dropped per-doc 0
+   1. ERR-002#0  0.580
+   2. ERR-003#0  0.551
+   3. TS-002#0   0.435
+   4. HIST-001#0 0.393
+   5. DQ-001#0   0.309
+'why is it so slow': ok | best score 0.267 | kept 3, dropped low 2, dropped per-doc 0
+   1. ERR-006#0  0.267
+   2. TS-003#0   0.243
+   3. ERR-005#0  0.174
+'fail': ok | best score 0.220 | kept 5, dropped low 0, dropped per-doc 0
+   1. ERR-002#0  0.220
+   2. ERR-003#0  0.214
+   3. TS-003#0   0.211
+   4. TS-001#0   0.211
+   5. ERR-004#0  0.208
+'SELECT denied on main.sales.customers': ok | best score 0.644 | kept 5, dropped low 0, dropped per-doc 0
+   1. ERR-002#0  0.644
+   2. ERR-003#0  0.626
+   3. TS-002#0   0.542
+   4. ERR-004#0  0.407
+   5. HIST-001#0 0.374
+'user has SELECT permission on customers': ok | best score 0.595 | kept 5, dropped low 0, dropped per-doc 0
+   1. ERR-002#0  0.595
+   2. ERR-003#0  0.548
+   3. TS-002#0   0.390
+   4. HIST-001#0 0.260
+   5. DQ-001#0   0.224
+'how do I bake bread': no_evidence | best score 0.114 | kept 0, dropped low 5, dropped per-doc 0
