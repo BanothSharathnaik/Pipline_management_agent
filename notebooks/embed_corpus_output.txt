@@ -1,0 +1,36 @@
+model sentence-transformers/all-MiniLM-L6-v2 (dim 384) ready in 8.7s
+[MOCK DATA] 12 documents -> 12 chunks
+starting a new cache (embedding cache not found: /Users/anmolkrishna/PROJECTS/Pipline monitoring-agent/databricks-rag-monitor/databricks-rag-monitor/data/cache/embeddings.npz)
+embedded chunks in 1.89s | new entries: 12 | hits 0, misses 12
+vectors shape (12, 384)
+
+=== 'access denied for customer data'
+  1. ERR-002#0  0.580  Permission denied reading customers table
+  2. ERR-003#0  0.551  Principal lacks privilege on customers table
+  3. TS-002#0   0.435  Investigating permission errors
+
+=== 'why is it so slow'
+  1. ERR-006#0  0.267  Out of memory during join
+  2. TS-003#0   0.243  Investigating long runs and timeouts
+  3. ERR-005#0  0.174  Daily sales aggregation timed out
+
+=== 'fail'
+  1. ERR-002#0  0.220  Permission denied reading customers table
+  2. ERR-003#0  0.214  Principal lacks privilege on customers table
+  3. TS-003#0   0.211  Investigating long runs and timeouts
+
+=== 'SELECT denied on main.sales.customers'
+  1. ERR-002#0  0.644  Permission denied reading customers table
+  2. ERR-003#0  0.626  Principal lacks privilege on customers table
+  3. TS-002#0   0.542  Investigating permission errors
+
+=== 'user has SELECT permission on customers'
+  1. ERR-002#0  0.595  Permission denied reading customers table
+  2. ERR-003#0  0.548  Principal lacks privilege on customers table
+  3. TS-002#0   0.390  Investigating permission errors
+
+=== 'how do I bake bread'
+  1. ERR-003#0  0.114  Principal lacks privilege on customers table
+  2. HIST-001#0 0.079  New service account could not create tables
+  3. TS-002#0   0.068  Investigating permission errors
+
