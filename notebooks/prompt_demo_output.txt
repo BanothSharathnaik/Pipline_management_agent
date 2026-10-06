@@ -1,0 +1,140 @@
+[MOCK DATA] prompts are built, not sent anywhere
+
+##### Why did run r2003 fail?
+system 1288 chars + user 3876 chars = 5164 (roughly 1291 tokens, a rough estimate)
+fact ids: {'F1': 'r2003'}
+evidence ids: {'E1': 'ERR-003#0', 'E2': 'HIST-003#0', 'E3': 'ERR-002#0', 'E4': 'TS-002#0', 'E5': 'HIST-001#0', 'E6': 'ERR-004#0'}
+
+<question>
+Why did run r2003 fail?
+</question>
+
+<monitoring_facts>
+[F1] run r2003 | job customer_etl (j_cust) | result FAILED | source mock
+     started 2026-10-03 02:00 UTC | ended 2026-10-03 02:03 UTC | duration 3m45s
+     error: PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+     failed tasks: (none) | skipped tasks: (none)
+</monitoring_facts>
+
+<notes>
+- similarity search used the recorded error message of run r2003 as the query, not the question
+</notes>
+
+<evidence id="E1" doc="ERR-003" chunk="ERR-003#0" title="Principal lacks privilege on customers table" file="err_003_permission_select_variant.txt" doc_type="error_log" source="mock" run="r2003" timestamp="2026-10-03T02:03:45+00:00" relation="linked to run r2003 by run_id metadata">
+Run failed at the first task.
+PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+</evidence>
+
+<evidence id="E2" doc="HIST-003" chunk="HIST-003#0" title="Customers table access granted to ETL principal" file="hist_003_customers_grant.txt" doc_type="historical_failure" source="mock" run="none" timestamp="2026-10-02T09:00:00+00:00" relation="similar text only; not tied to a specific run; timing: before this run (relative to run r2003)">
+Permission denied on main.crm.customers was investigated after the customer_etl failure.
+SELECT on main.crm.customers was granted to the ETL principal. Access issue considered resolved.
+</evidence>
+
+<evidence id="E3" doc="ERR-002" chunk="ERR-002#0" title="Permission denied reading customers table" file="err_002_permission_select.txt" doc_type="error_log" source="mock" run="r2002" timestamp="2026-10-02T02:03:30+00:00" relation="similar text only; belongs to run r2002; timing: before this run (relative to run r2003)">
+Task ingest_customers failed.
+PermissionDenied: User does not have SELECT on table main.crm.customers
+Downstream tasks transform_customers and publish were skipped.
+</evidence>
+
+<evidence id="E4" doc="TS-002" chunk="TS-002#0" title="Investigating permission errors" file="ts_002_permissions.txt" doc_type="troubleshooting" source="mock" run="none" timestamp="none" relation="similar text only; not tied to a specific run; timing: undated (relative to run r2003)">
+For permission denied errors, identify the principal the job runs as.
+Use SHOW GRANTS on the table to see which privileges exist.
+Missing SELECT, USE SCHEMA, or USE CATALOG privileges are common causes.
+Ask the table owner or an admin to grant access.
+</evidence>
+
+<evidence id="E5" doc="HIST-001" chunk="HIST-001#0" title="New service account could not create tables" file="hist_001_create_table_permission.txt" doc_type="historical_failure" source="mock" run="none" timestamp="2026-08-12T00:00:00+00:00" relation="similar text only; not tied to a specific run; timing: before this run (relative to run r2003)">
+A new service account failed with a permission error when writing to schema main.sales.
+The account had USE SCHEMA but no CREATE TABLE privilege.
+Resolved by granting CREATE TABLE on the schema to the service account.
+</evidence>
+
+<evidence id="E6" doc="ERR-004" chunk="ERR-004#0" title="Cleaned orders table missing" file="err_004_table_not_found.txt" doc_type="error_log" source="mock" run="r3004" timestamp="2026-10-04T04:00:05+00:00" relation="similar text only; belongs to run r3004; timing: after this run (relative to run r2003)">
+AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema and catalog.
+The run failed 5 seconds after it started.
+</evidence>
+
+<conflicts>
+HIST-003 claims the problem was resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers. This does not prove the fix failed; the claim is not confirmed by later runs.
+</conflicts>
+
+==============================================================================
+
+##### Why did run r3004 fail?
+system 1288 chars + user 3760 chars = 5048 (roughly 1262 tokens, a rough estimate)
+fact ids: {'F1': 'r3004'}
+evidence ids: {'E1': 'ERR-004#0', 'E2': 'ERR-001#0', 'E3': 'TS-002#0', 'E4': 'HIST-003#0', 'E5': 'HIST-001#0', 'E6': 'ERR-002#0'}
+
+<question>
+Why did run r3004 fail?
+</question>
+
+<monitoring_facts>
+[F1] run r3004 | job daily_sales_agg (j_sales) | result FAILED | source mock
+     started 2026-10-04 04:00 UTC | ended 2026-10-04 04:00 UTC | duration 0m05s
+     error: AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found.
+     failed tasks: (none) | skipped tasks: (none)
+</monitoring_facts>
+
+<notes>
+- similarity search used the recorded error message of run r3004 as the query, not the question
+</notes>
+
+<evidence id="E1" doc="ERR-004" chunk="ERR-004#0" title="Cleaned orders table missing" file="err_004_table_not_found.txt" doc_type="error_log" source="mock" run="r3004" timestamp="2026-10-04T04:00:05+00:00" relation="linked to run r3004 by run_id metadata">
+AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema and catalog.
+The run failed 5 seconds after it started.
+</evidence>
+
+<evidence id="E2" doc="ERR-001" chunk="ERR-001#0" title="Unresolved column in orders load" file="err_001_unresolved_column.txt" doc_type="error_log" source="mock" run="r1004" timestamp="2026-10-04T01:02:15+00:00" relation="similar text only; belongs to run r1004; timing: before this run (relative to run r3004)">
+Task load failed.
+AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the following? [`order_amount`, `order_id`]
+The task extract completed successfully before this failure.
+</evidence>
+
+<evidence id="E3" doc="TS-002" chunk="TS-002#0" title="Investigating permission errors" file="ts_002_permissions.txt" doc_type="troubleshooting" source="mock" run="none" timestamp="none" relation="similar text only; not tied to a specific run; timing: undated (relative to run r3004)">
+For permission denied errors, identify the principal the job runs as.
+Use SHOW GRANTS on the table to see which privileges exist.
+Missing SELECT, USE SCHEMA, or USE CATALOG privileges are common causes.
+Ask the table owner or an admin to grant access.
+</evidence>
+
+<evidence id="E4" doc="HIST-003" chunk="HIST-003#0" title="Customers table access granted to ETL principal" file="hist_003_customers_grant.txt" doc_type="historical_failure" source="mock" run="none" timestamp="2026-10-02T09:00:00+00:00" relation="similar text only; not tied to a specific run; timing: before this run (relative to run r3004)">
+Permission denied on main.crm.customers was investigated after the customer_etl failure.
+SELECT on main.crm.customers was granted to the ETL principal. Access issue considered resolved.
+</evidence>
+
+<evidence id="E5" doc="HIST-001" chunk="HIST-001#0" title="New service account could not create tables" file="hist_001_create_table_permission.txt" doc_type="historical_failure" source="mock" run="none" timestamp="2026-08-12T00:00:00+00:00" relation="similar text only; not tied to a specific run; timing: before this run (relative to run r3004)">
+A new service account failed with a permission error when writing to schema main.sales.
+The account had USE SCHEMA but no CREATE TABLE privilege.
+Resolved by granting CREATE TABLE on the schema to the service account.
+</evidence>
+
+<evidence id="E6" doc="ERR-002" chunk="ERR-002#0" title="Permission denied reading customers table" file="err_002_permission_select.txt" doc_type="error_log" source="mock" run="r2002" timestamp="2026-10-02T02:03:30+00:00" relation="similar text only; belongs to run r2002; timing: before this run (relative to run r3004)">
+Task ingest_customers failed.
+PermissionDenied: User does not have SELECT on table main.crm.customers
+Downstream tasks transform_customers and publish were skipped.
+</evidence>
+
+==============================================================================
+
+##### Why did run r9999 fail?
+system 1288 chars + user 374 chars = 1662 (roughly 415 tokens, a rough estimate)
+fact ids: {}
+evidence ids: {}
+
+<question>
+Why did run r9999 fail?
+</question>
+
+<monitoring_facts>
+No monitoring facts are available for this question.
+</monitoring_facts>
+
+<notes>
+- run r9999 not found in monitoring data; its status and errors cannot be established
+- semantic search skipped: no mentioned run exists in the monitoring data
+- no diagnostic evidence was retrieved for this question
+</notes>
+
+==============================================================================
+

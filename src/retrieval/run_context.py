@@ -7,7 +7,7 @@ from typing import Optional, Sequence
 from src.ingestion.parser import Document
 from src.monitoring.models import ResultState, RunRecord
 from src.monitoring.queries import FAILURE_STATES
-from src.retrieval.conflicts import Conflict, find_conflicts, relevant_conflicts
+from src.retrieval.conflicts import Conflict, find_conflicts, object_names, relevant_conflicts
 from src.retrieval.search import RetrievalPipeline, RetrievalReport, _line, extract_run_ids
 
 
@@ -85,6 +85,17 @@ def plan_related_query(facts: Sequence[RunFacts]) -> tuple[Optional[str], Option
     )
 
 
+def _conflicts_for_runs(conflicts: Sequence[Conflict], facts: Sequence[RunFacts]) -> tuple[Conflict, ...]:
+    """With runs in the question, keep only conflicts about objects those runs' errors name."""
+    if not facts:
+        return tuple(conflicts)
+    asked: set[str] = set()
+    for f in facts:
+        if f.error_message:
+            asked |= object_names(f.error_message)
+    return tuple(c for c in conflicts if asked & set(c.shared_objects))
+
+
 def retrieve_for_question(
     pipeline: RetrievalPipeline,
     question: str,
@@ -96,7 +107,10 @@ def retrieve_for_question(
     facts = tuple(facts_from_run(r) for r in runs if r.run_id.lower() in wanted)
     query, note = plan_related_query(facts)
     report = pipeline.retrieve(question, top_k=top_k, related_query=query)
-    conflicts = relevant_conflicts(report, find_conflicts(docs, runs)) if docs else ()
+    conflicts = (
+        _conflicts_for_runs(relevant_conflicts(report, find_conflicts(docs, runs)), facts)
+        if docs else ()
+    )
     return RunContext(report=report, facts=facts, query_note=note,
                       query_used=query or question, conflicts=conflicts)
 

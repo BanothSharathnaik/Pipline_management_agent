@@ -153,3 +153,21 @@ def test_no_conflict_reported_when_document_not_retrieved():
 def test_docs_argument_is_optional():
     pipeline = build(CORPUS + DEMO.docs)
     assert retrieve_for_question(pipeline, "Why did run r2003 fail?", RUNS).conflicts == ()
+
+
+def test_unrelated_run_gets_no_conflict():
+    d = CORPUS + DEMO.docs
+    ctx = retrieve_for_question(build(d), "Why did run r3004 fail?", RUNS, docs=d)
+    assert ctx.conflicts == ()
+
+
+def test_run_without_error_text_gets_no_conflict():
+    d = CORPUS + DEMO.docs
+    ctx = retrieve_for_question(build(d), "Why did run r2005 fail?", RUNS, docs=d)
+    assert ctx.conflicts == ()
+
+
+def test_related_run_keeps_conflict():
+    d = CORPUS + DEMO.docs
+    ctx = retrieve_for_question(build(d), "Why did run r2002 fail?", RUNS, docs=d)
+    assert [(c.doc_id, c.run_id) for c in ctx.conflicts] == [("HIST-003", "r2003")]
