@@ -1,0 +1,127 @@
+[MOCK DATA] 13 documents (including planted conflict document HIST-003), 13 chunks, 16 runs
+
+Question: Why did run r2003 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2003 | job customer_etl (j_cust) | FAILED
+  started 2026-10-03 02:00 UTC | ended 2026-10-03 02:03 UTC | duration 3m45s
+  error: PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r2003 as the query, not the question
+
+Evidence linked to run r2003 (by run_id metadata; score is not relevance):
+  1. ERR-003#0  score=0.870  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. HIST-003#0  score=0.782  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+       relation to run r2003: before this run
+  2. ERR-002#0  score=0.687  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r2003: before this run
+  3. TS-002#0  score=0.498  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2003: undated
+  4. HIST-001#0  score=0.489  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r2003: before this run
+  5. ERR-004#0  score=0.312  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r2003: after this run
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+==============================================================================
+
+Question: Why did run r2002 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2002 | job customer_etl (j_cust) | FAILED
+  started 2026-10-02 02:00 UTC | ended 2026-10-02 02:03 UTC | duration 3m30s
+  error: PermissionDenied: User does not have SELECT on table main.crm.customers
+  failed tasks: ingest_customers | skipped tasks: transform_customers, publish
+NOTE: similarity search used the recorded error message of run r2002 as the query, not the question
+
+Evidence linked to run r2002 (by run_id metadata; score is not relevance):
+  1. ERR-002#0  score=0.748  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. HIST-003#0  score=0.737  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+       relation to run r2002: after this run
+  2. ERR-003#0  score=0.721  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+       relation to run r2002: after this run
+  3. TS-002#0  score=0.525  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2002: undated
+  4. HIST-001#0  score=0.440  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r2002: before this run
+  5. DQ-001#0  score=0.366  run=n/a  source=mock  file=dq_001_null_customer_id.txt  chars=0-194  ts=2026-09-28T02:20:00+00:00
+       Pipeline customer_pipeline update completed. Expectation valid_customer_id was violated. Rows with a null customer_id were dropped from the target table. The...
+       relation to run r2002: before this run
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+==============================================================================
+
+Question: Have we seen this permission error before?
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-002#0  score=0.499  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+  2. ERR-003#0  score=0.458  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  3. HIST-003#0  score=0.446  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+  4. TS-002#0  score=0.425  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  5. HIST-001#0  score=0.378  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+==============================================================================
+
+Question: Why did run r3004 fail?
+Verified run facts (monitoring data, source=mock):
+  run r3004 | job daily_sales_agg (j_sales) | FAILED
+  started 2026-10-04 04:00 UTC | ended 2026-10-04 04:00 UTC | duration 0m05s
+  error: AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found.
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r3004 as the query, not the question
+
+Evidence linked to run r3004 (by run_id metadata; score is not relevance):
+  1. ERR-004#0  score=0.926  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-001#0  score=0.546  run=r1004  source=mock  file=err_001_unresolved_column.txt  chars=0-250  ts=2026-10-04T01:02:15+00:00
+       Task load failed. AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the followi...
+       relation to run r3004: before this run
+  2. TS-002#0  score=0.458  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r3004: undated
+  3. HIST-003#0  score=0.397  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+       relation to run r3004: before this run
+  4. HIST-001#0  score=0.396  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r3004: before this run
+  5. ERR-002#0  score=0.366  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r3004: before this run
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+==============================================================================
+

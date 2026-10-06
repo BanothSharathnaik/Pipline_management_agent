@@ -11,8 +11,9 @@ VALID_DOC_TYPES = frozenset(
     {"error_log", "historical_failure", "troubleshooting", "data_quality"}
 )
 VALID_SOURCES = frozenset({"mock", "live"})
+VALID_CLAIMS = frozenset({"resolved"})
 REQUIRED_KEYS = ("doc_id", "doc_type", "source")
-OPTIONAL_KEYS = ("title", "run_id", "job_id", "timestamp")
+OPTIONAL_KEYS = ("title", "run_id", "job_id", "timestamp", "claim")
 SEPARATOR = "---"
 
 
@@ -26,6 +27,7 @@ class Document:
     run_id: Optional[str] = None
     job_id: Optional[str] = None
     timestamp: Optional[datetime] = None
+    claim: Optional[str] = None
     origin: str = "<memory>"  # file name, for traceability
 
 
@@ -73,6 +75,10 @@ def parse_document(text: str, origin: str = "<memory>") -> Document:
     if header["source"] not in VALID_SOURCES:
         raise ValueError(f"source must be one of {sorted(VALID_SOURCES)}, got {header['source']!r}")
 
+    claim = header.get("claim")
+    if claim and claim not in VALID_CLAIMS:
+        raise ValueError(f"claim must be one of {sorted(VALID_CLAIMS)}, got {claim!r}")
+
     body = "\n".join(lines[sep_index + 1:]).strip()
     if not body:
         raise ValueError("document body is empty")
@@ -86,6 +92,7 @@ def parse_document(text: str, origin: str = "<memory>") -> Document:
         run_id=header.get("run_id") or None,
         job_id=header.get("job_id") or None,
         timestamp=_parse_time(header.get("timestamp")),
+        claim=claim or None,
         origin=origin,
     )
 

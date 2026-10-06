@@ -1,0 +1,10 @@
+doc_id: HIST-003
+doc_type: historical_failure
+source: mock
+title: Customers table access granted to ETL principal
+job_id: j_cust
+timestamp: 2026-10-02T09:00:00+00:00
+claim: resolved
+---
+Permission denied on main.crm.customers was investigated after the customer_etl failure.
+SELECT on main.crm.customers was granted to the ETL principal. Access issue considered resolved.

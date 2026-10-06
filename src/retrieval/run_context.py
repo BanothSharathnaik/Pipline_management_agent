@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional, Sequence
 
+from src.ingestion.parser import Document
 from src.monitoring.models import ResultState, RunRecord
 from src.monitoring.queries import FAILURE_STATES
+from src.retrieval.conflicts import Conflict, find_conflicts, relevant_conflicts
 from src.retrieval.search import RetrievalPipeline, RetrievalReport, _line, extract_run_ids
 
 
@@ -31,6 +33,7 @@ class RunContext:
     facts: tuple[RunFacts, ...]
     query_note: Optional[str]
     query_used: str
+    conflicts: tuple[Conflict, ...] = ()
 
 
 def facts_from_run(run: RunRecord) -> RunFacts:
@@ -87,12 +90,15 @@ def retrieve_for_question(
     question: str,
     runs: Sequence[RunRecord],
     top_k: int = 5,
+    docs: Optional[Sequence[Document]] = None,
 ) -> RunContext:
     wanted = set(extract_run_ids(question))
     facts = tuple(facts_from_run(r) for r in runs if r.run_id.lower() in wanted)
     query, note = plan_related_query(facts)
     report = pipeline.retrieve(question, top_k=top_k, related_query=query)
-    return RunContext(report=report, facts=facts, query_note=note, query_used=query or question)
+    conflicts = relevant_conflicts(report, find_conflicts(docs, runs)) if docs else ()
+    return RunContext(report=report, facts=facts, query_note=note,
+                      query_used=query or question, conflicts=conflicts)
 
 
 def _fmt_time(dt: Optional[datetime]) -> str:
@@ -148,4 +154,17 @@ def format_context(ctx: RunContext) -> str:
         best = rep.related.best_score
         detail = f" (best match scored {best:.3f})" if best is not None else ""
         lines.append(f"  no evidence above min score {rep.related.min_score:.2f}{detail}")
+
+    if ctx.conflicts:
+        lines.append("\nPOSSIBLE CONFLICTS (rule-based check of documents against monitoring data):")
+        for c in ctx.conflicts:
+            lines.append(
+                f"  {c.doc_id} (file {c.origin}) claims resolved at {_fmt_time(c.claim_time)}, "
+                f"but run {c.run_id} started {_fmt_time(c.run_start)}, ended in a failure state, "
+                f"and its error names {', '.join(c.shared_objects)}."
+            )
+        lines.append(
+            "  This does not prove the fix failed (the cause may differ). "
+            "It means the claim is not confirmed by later runs."
+        )
     return "\n".join(lines)
