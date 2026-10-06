@@ -1,0 +1,131 @@
+[MOCK DATA] 12 chunks, 16 runs
+
+Question: Why did run r2002 fail?
+Run IDs mentioned: r2002
+
+Evidence linked to run r2002 (by run_id metadata, not similarity):
+  1. ERR-002#0  score=0.075  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-005#0  score=0.254  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+  2. TS-003#0  score=0.206  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+  3. ERR-004#0  score=0.205  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+  4. TS-002#0  score=0.195  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  5. TS-001#0  score=0.193  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+
+==============================================================================
+
+Question: Why did run r2003 fail?
+Run IDs mentioned: r2003
+
+Evidence linked to run r2003 (by run_id metadata, not similarity):
+  1. ERR-003#0  score=0.129  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-005#0  score=0.250  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+  2. ERR-004#0  score=0.226  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+  3. TS-003#0  score=0.209  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+  4. TS-002#0  score=0.204  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  5. TS-001#0  score=0.203  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+
+==============================================================================
+
+Question: Why did run r1004 fail?
+Run IDs mentioned: r1004
+
+Evidence linked to run r1004 (by run_id metadata, not similarity):
+  1. ERR-001#0  score=0.144  run=r1004  source=mock  file=err_001_unresolved_column.txt  chars=0-250  ts=2026-10-04T01:02:15+00:00
+       Task load failed. AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the followi...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-005#0  score=0.272  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+  2. ERR-004#0  score=0.228  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+  3. TS-003#0  score=0.222  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+  4. TS-002#0  score=0.209  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  5. TS-001#0  score=0.196  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+
+==============================================================================
+
+Question: Why did run r2005 fail?
+Run IDs mentioned: r2005
+NOTE: no diagnostic documents are linked to run r2005
+
+Evidence linked to run r2005 (by run_id metadata, not similarity):
+  (none)
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-005#0  score=0.241  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+  2. ERR-004#0  score=0.214  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+  3. TS-002#0  score=0.208  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  4. TS-003#0  score=0.200  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+  5. TS-001#0  score=0.198  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+
+==============================================================================
+
+Question: Why did run r9999 fail?
+Run IDs mentioned: r9999
+NOTE: run r9999 not found in monitoring data; its status and errors cannot be established
+NOTE: semantic search skipped: no mentioned run exists in the monitoring data
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  no evidence above min score 0.15
+
+==============================================================================
+
+Question: Why is it so slow?
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-006#0  score=0.252  run=n/a  source=mock  file=err_006_out_of_memory.txt  chars=0-131  ts=2026-09-20T03:15:00+00:00
+       java.lang.OutOfMemoryError: Java heap space Executor lost while running a large join stage. Increase memory or reduce shuffle size.
+  2. TS-003#0  score=0.248  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+  3. ERR-005#0  score=0.160  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+
+==============================================================================
+
+Question: Have we seen this permission error before?
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-002#0  score=0.499  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+  2. ERR-003#0  score=0.458  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  3. TS-002#0  score=0.425  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  4. HIST-001#0  score=0.378  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+  5. ERR-004#0  score=0.298  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+
+==============================================================================
+
+Question: how do I bake bread
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  no evidence above min score 0.15 (best match scored 0.114)
+
+==============================================================================
+
