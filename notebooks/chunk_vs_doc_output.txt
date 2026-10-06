@@ -1,0 +1,50 @@
+[MOCK DATA] 12 documents -> 12 chunks (default policy), 28 chunks (max_chars=120, overlap 1)
+
+=== 'show grants privileges'
+document level:
+  1. TS-002    0.402  (251 chars)
+chunk level (small chunks):
+  1. TS-002#1    0.641  chars 70-129  matched=['grants', 'privileges', 'show']
+       'Use SHOW GRANTS on the table to see which privileges exist.'
+  2. TS-002#2    0.169  chars 130-202  matched=['privileges']
+       'Missing SELECT, USE SCHEMA, or USE CATALOG privileges are common cause'
+
+=== 'permission denied main.crm.customers'
+document level:
+  1. ERR-002   0.626  (164 chars)
+  2. ERR-003   0.530  (103 chars)
+  3. TS-002    0.149  (251 chars)
+chunk level (small chunks):
+  1. ERR-002#0   0.712  chars 0-101  matched=['crm', 'customers', 'denied', 'main', 'permission']
+       'Task ingest_customers failed.\nPermissionDenied: User does not have SEL'
+  2. ERR-003#0   0.512  chars 0-103  matched=['crm', 'customers', 'denied', 'main', 'permission']
+       'Run failed at the first task.\nPERMISSION_DENIED: principal lacks SELEC'
+  3. ERR-002#1   0.399  chars 102-164  matched=['customers', 'denied', 'permission']
+       'Downstream tasks transform_customers and publish were skipped.'
+
+=== 'unresolved column schema'
+document level:
+  1. TS-001    0.355  (266 chars)
+  2. HIST-002  0.353  (189 chars)
+  3. ERR-001   0.320  (250 chars)
+chunk level (small chunks):
+  1. TS-001#0    0.492  chars 0-115  matched=['column', 'schema', 'unresolved']
+       'When a task fails with an unresolved column error, compare the column '
+  2. ERR-001#1   0.442  chars 18-138  matched=['column', 'unresolved']
+       'AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with n'
+  3. ERR-001#0   0.401  chars 0-17  matched=['column', 'unresolved']
+       'Task load failed.'
+
+=== 'timeout seconds'
+document level:
+  1. ERR-005   0.310  (96 chars)
+  2. ERR-004   0.124  (211 chars)
+  3. TS-003    0.117  (208 chars)
+chunk level (small chunks):
+  1. ERR-005#0   0.318  chars 0-96  matched=['seconds', 'timeout']
+       'Run exceeded timeout of 1800 seconds.\nThe run was stopped by the sched'
+  2. ERR-004#1   0.200  chars 120-211  matched=['seconds']
+       'lling and correctness of the schema and catalog.\nThe run failed 5 seco'
+  3. TS-003#2    0.190  chars 128-208  matched=['timeout']
+       'If a timeout is configured, confirm it matches the normal runtime plus'
+
