@@ -1,0 +1,33 @@
+[MOCK DATA] index holds 12 chunks, dim 384
+
+'access denied for customer data': matches brute force
+   1. ERR-002#0  0.580
+   2. ERR-003#0  0.551
+   3. TS-002#0   0.435
+'why is it so slow': matches brute force
+   1. ERR-006#0  0.267
+   2. TS-003#0   0.243
+   3. ERR-005#0  0.174
+'fail': matches brute force
+   1. ERR-002#0  0.220
+   2. ERR-003#0  0.214
+   3. TS-003#0   0.211
+'SELECT denied on main.sales.customers': matches brute force
+   1. ERR-002#0  0.644
+   2. ERR-003#0  0.626
+   3. TS-002#0   0.542
+'user has SELECT permission on customers': matches brute force
+   1. ERR-002#0  0.595
+   2. ERR-003#0  0.548
+   3. TS-002#0   0.390
+'how do I bake bread': matches brute force
+   1. ERR-003#0  0.114
+   2. HIST-001#0 0.079
+   3. TS-002#0   0.068
+
+filter demo: 'why is it so slow', troubleshooting only
+   1. TS-003#0   0.243  Investigating long runs and timeouts
+   2. TS-002#0   0.085  Investigating permission errors
+   3. TS-001#0   0.029  Investigating schema mismatch and missing columns
+
+ALL MATCH
