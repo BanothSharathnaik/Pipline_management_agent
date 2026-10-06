@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Optional
 
 import numpy as np
 
@@ -57,7 +57,9 @@ class RetrievalPipeline:
         self._min_score = min_score
         self._max_per_doc = max_per_doc
 
-    def retrieve(self, question: str, top_k: int = 5) -> RetrievalReport:
+    def retrieve(
+        self, question: str, top_k: int = 5, related_query: Optional[str] = None
+    ) -> RetrievalReport:
         if not isinstance(question, str) or not question.strip():
             raise ValueError("question must be a non-empty string")
         if top_k < 1:
@@ -82,7 +84,8 @@ class RetrievalPipeline:
                 notes=tuple(notes),
             )
 
-        qvec = self._embedder.embed([question])[0]
+        text = related_query if related_query and related_query.strip() else question
+        qvec = self._embedder.embed([text])[0]
         if float(np.linalg.norm(qvec)) == 0.0:
             raise ValueError("question has no searchable content")
 

@@ -1,0 +1,166 @@
+[MOCK DATA] 12 chunks, 16 runs
+
+Question: Why did run r2002 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2002 | job customer_etl (j_cust) | FAILED
+  started 2026-10-02 02:00 UTC | ended 2026-10-02 02:03 UTC | duration 3m30s
+  error: PermissionDenied: User does not have SELECT on table main.crm.customers
+  failed tasks: ingest_customers | skipped tasks: transform_customers, publish
+NOTE: similarity search used the recorded error message of run r2002 as the query, not the question
+
+Evidence linked to run r2002 (by run_id metadata; score is not relevance):
+  1. ERR-002#0  score=0.748  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-003#0  score=0.721  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+       relation to run r2002: after this run
+  2. TS-002#0  score=0.525  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2002: undated
+  3. HIST-001#0  score=0.440  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r2002: before this run
+  4. DQ-001#0  score=0.366  run=n/a  source=mock  file=dq_001_null_customer_id.txt  chars=0-194  ts=2026-09-28T02:20:00+00:00
+       Pipeline customer_pipeline update completed. Expectation valid_customer_id was violated. Rows with a null customer_id were dropped from the target table. The...
+       relation to run r2002: before this run
+  5. ERR-004#0  score=0.323  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r2002: after this run
+
+==============================================================================
+
+Question: Why did run r2003 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2003 | job customer_etl (j_cust) | FAILED
+  started 2026-10-03 02:00 UTC | ended 2026-10-03 02:03 UTC | duration 3m45s
+  error: PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r2003 as the query, not the question
+
+Evidence linked to run r2003 (by run_id metadata; score is not relevance):
+  1. ERR-003#0  score=0.870  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-002#0  score=0.687  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r2003: before this run
+  2. TS-002#0  score=0.498  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2003: undated
+  3. HIST-001#0  score=0.489  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r2003: before this run
+  4. ERR-004#0  score=0.312  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r2003: after this run
+  5. DQ-001#0  score=0.304  run=n/a  source=mock  file=dq_001_null_customer_id.txt  chars=0-194  ts=2026-09-28T02:20:00+00:00
+       Pipeline customer_pipeline update completed. Expectation valid_customer_id was violated. Rows with a null customer_id were dropped from the target table. The...
+       relation to run r2003: before this run
+
+==============================================================================
+
+Question: Why did run r1004 fail?
+Verified run facts (monitoring data, source=mock):
+  run r1004 | job orders_ingest (j_orders) | FAILED
+  started 2026-10-04 01:00 UTC | ended 2026-10-04 01:02 UTC | duration 2m15s
+  error: AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the following? [`order_amount`, `order_id`]
+  failed tasks: load | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r1004 as the query, not the question
+
+Evidence linked to run r1004 (by run_id metadata; score is not relevance):
+  1. ERR-001#0  score=0.836  run=r1004  source=mock  file=err_001_unresolved_column.txt  chars=0-250  ts=2026-10-04T01:02:15+00:00
+       Task load failed. AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the followi...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-004#0  score=0.479  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r1004: after this run
+  2. TS-001#0  score=0.365  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+       relation to run r1004: undated
+  3. ERR-005#0  score=0.280  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+       relation to run r1004: before this run
+  4. HIST-002#0  score=0.256  run=n/a  source=mock  file=hist_002_column_renamed.txt  chars=0-189  ts=2026-07-18T00:00:00+00:00
+       The source system renamed a column. Jobs that still referenced the old column name failed with an unresolved column error. Fixed by updating the column refer...
+       relation to run r1004: before this run
+  5. TS-002#0  score=0.224  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r1004: undated
+
+==============================================================================
+
+Question: Why did run r3004 fail?
+Verified run facts (monitoring data, source=mock):
+  run r3004 | job daily_sales_agg (j_sales) | FAILED
+  started 2026-10-04 04:00 UTC | ended 2026-10-04 04:00 UTC | duration 0m05s
+  error: AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found.
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r3004 as the query, not the question
+
+Evidence linked to run r3004 (by run_id metadata; score is not relevance):
+  1. ERR-004#0  score=0.926  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-001#0  score=0.546  run=r1004  source=mock  file=err_001_unresolved_column.txt  chars=0-250  ts=2026-10-04T01:02:15+00:00
+       Task load failed. AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the followi...
+       relation to run r3004: before this run
+  2. TS-002#0  score=0.458  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r3004: undated
+  3. HIST-001#0  score=0.396  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r3004: before this run
+  4. ERR-002#0  score=0.366  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r3004: before this run
+  5. ERR-003#0  score=0.362  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+       relation to run r3004: before this run
+
+==============================================================================
+
+Question: Why did run r2005 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2005 | job customer_etl (j_cust) | FAILED
+  started 2026-10-04 20:00 UTC | ended 2026-10-04 20:02 UTC | duration 2m00s
+  error: (none recorded)
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: no diagnostic documents are linked to run r2005
+NOTE: run r2005 has no recorded error message: similarity search used the question text, which carries little error information
+
+Evidence linked to run r2005 (by run_id metadata; score is not relevance):
+  (none)
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-005#0  score=0.241  run=r3002  source=mock  file=err_005_timeout.txt  chars=0-96  ts=2026-10-02T04:30:00+00:00
+       Run exceeded timeout of 1800 seconds. The run was stopped by the scheduler and marked TIMED_OUT.
+       relation to run r2005: before this run
+  2. ERR-004#0  score=0.214  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r2005: before this run
+  3. TS-002#0  score=0.208  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2005: undated
+  4. TS-003#0  score=0.200  run=n/a  source=mock  file=ts_003_timeouts.txt  chars=0-208  ts=n/a
+       Compare the run duration with earlier successful runs of the same job. Check input data volume, skewed joins, and compute size. If a timeout is configured, c...
+       relation to run r2005: undated
+  5. TS-001#0  score=0.198  run=n/a  source=mock  file=ts_001_schema_mismatch.txt  chars=0-266  ts=n/a
+       When a task fails with an unresolved column error, compare the column names the code expects with the table schema. Use DESCRIBE TABLE to list current column...
+       relation to run r2005: undated
+
+==============================================================================
+
+Question: Why did run r9999 fail?
+NOTE: run r9999 not found in monitoring data; its status and errors cannot be established
+NOTE: semantic search skipped: no mentioned run exists in the monitoring data
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  no evidence above min score 0.15
+
+==============================================================================
+
