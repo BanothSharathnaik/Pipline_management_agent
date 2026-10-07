@@ -50,14 +50,16 @@ def print_run_detail(r: RunRecord) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="python3 -m src.app")
+    p.add_argument("--dashboard", action="store_true", help="launch the Streamlit web dashboard")
     p.add_argument("--source", choices=["mock", "live"], default="mock",
                    help="mock sample data (default) or the saved live snapshot")
     p.add_argument("--data", type=Path, default=None, help="mock runs JSON file (mock source only)")
     p.add_argument("--snapshot", type=Path, default=None,
                    help="live snapshot file (default data/live/runs_snapshot.json)")
     p.add_argument("--now", help="ISO time with timezone; default is the current time")
-    sub = p.add_subparsers(dest="command", required=True)
+    sub = p.add_subparsers(dest="command", required=False)
 
+    sub.add_parser("dashboard", help="launch the Streamlit web dashboard")
     sub.add_parser("summary", help="counts per result state")
 
     s = sub.add_parser("latest", help="most recent run")
@@ -185,6 +187,15 @@ def _run_collect(args) -> int:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+
+    if getattr(args, "dashboard", False) or args.command == "dashboard":
+        import subprocess
+        dashboard_path = ROOT / "src" / "dashboard.py"
+        return subprocess.run([sys.executable, "-m", "streamlit", "run", str(dashboard_path)]).returncode
+
+    if not args.command:
+        build_parser().print_help()
+        return 2
 
     try:
         now = datetime.fromisoformat(args.now) if args.now else datetime.now(timezone.utc)
