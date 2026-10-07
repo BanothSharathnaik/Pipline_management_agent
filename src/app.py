@@ -11,11 +11,29 @@ from src.monitoring.collector import load_mock_runs
 from src.monitoring.formatting import fmt_run, fmt_time, run_detail_lines
 from src.monitoring.models import RunRecord
 
+import os
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA = ROOT / "data" / "mock_runs.json"
 DOC_DIR = ROOT / "data" / "diagnostic_documents"
 DEMO_DIR = ROOT / "data" / "conflict_demo"
 CACHE_PATH = ROOT / "data" / "cache" / "embeddings.npz"
+
+
+def _load_dotenv() -> None:
+    env_file = ROOT / ".env"
+    if env_file.is_file():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip(), v.strip()
+            if k and k not in os.environ:
+                os.environ[k] = v
+
+
+_load_dotenv()
 
 
 def print_runs(runs: Sequence[RunRecord], empty_message: str) -> None:

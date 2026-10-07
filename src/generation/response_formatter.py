@@ -45,16 +45,34 @@ def _own_objects(ctx: RunContext) -> frozenset[str]:
     return names
 
 
+def _has_section(text_low: str, section: str) -> bool:
+    if section == "verified facts":
+        return "verified facts" in text_low
+    if section == "possible explanations":
+        return "possible explanations" in text_low or "hypotheses" in text_low
+    if section == "what to investigate next":
+        return any(k in text_low for k in ("what to investigate next", "next steps", "recommended actions"))
+    if section == "limits":
+        return any(k in text_low for k in ("limits", "limitations", "investigation scope", "scope bounds"))
+    return section in text_low
+
+
 def _explanation_lines(answer: str) -> list[str]:
     low = answer.lower()
     start = low.find("possible explanations")
+    if start == -1:
+        start = low.find("hypotheses")
     if start == -1:
         return []
     newline = answer.find("\n", start)
     if newline == -1:
         return []
     body_start = newline + 1
-    ends = [low.find(h, body_start) for h in REQUIRED_SECTIONS if h != "possible explanations"]
+    end_markers = (
+        "what to investigate next", "next steps", "recommended actions",
+        "limits", "limitations", "investigation scope", "## 11", "## 12",
+    )
+    ends = [low.find(h, body_start) for h in end_markers]
     ends = [e for e in ends if e != -1]
     body = answer[body_start: min(ends) if ends else len(answer)]
     return [ln.strip() for ln in body.splitlines() if _LIST_LINE.match(ln)]
@@ -95,7 +113,7 @@ def check_answer(
         warnings.append(f"{len(uncited)} of {len(lines)} explanation lines cite no evidence or fact ID")
 
     low = answer.lower()
-    missing = [s for s in REQUIRED_SECTIONS if s not in low]
+    missing = [s for s in REQUIRED_SECTIONS if not _has_section(low, s)]
     if missing:
         warnings.append(f"the answer is missing sections: {', '.join(missing)}")
 

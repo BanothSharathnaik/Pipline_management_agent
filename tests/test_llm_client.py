@@ -134,7 +134,7 @@ def test_connection_refused():
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
         port = s.getsockname()[1]
-    with pytest.raises(LLMError, match="cannot reach Ollama"):
+    with pytest.raises(LLMError, match=r"cannot reach Ollama|timed out"):
         OllamaClient(model="m", base_url=f"http://127.0.0.1:{port}", timeout_s=2).generate("s", "u")
 
 

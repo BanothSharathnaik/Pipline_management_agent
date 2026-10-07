@@ -102,11 +102,12 @@ def retrieve_for_question(
     runs: Sequence[RunRecord],
     top_k: int = 5,
     docs: Optional[Sequence[Document]] = None,
+    min_score: Optional[float] = None,
 ) -> RunContext:
     wanted = set(extract_run_ids(question))
     facts = tuple(facts_from_run(r) for r in runs if r.run_id.lower() in wanted)
     query, note = plan_related_query(facts)
-    report = pipeline.retrieve(question, top_k=top_k, related_query=query)
+    report = pipeline.retrieve(question, top_k=top_k, related_query=query, min_score=min_score)
     conflicts = (
         _conflicts_for_runs(relevant_conflicts(report, find_conflicts(docs, runs)), facts)
         if docs else ()

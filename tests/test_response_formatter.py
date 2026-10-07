@@ -112,3 +112,15 @@ def test_cut_off_and_full_context_flagged():
 
 def test_normal_response_adds_no_flags():
     assert check_answer(GOOD, BUNDLE, CTX, resp()) == ()
+
+
+def test_standard_numbered_section_headers_accepted():
+    formatted = """## Verified facts
+- run r2003 failed [F1]
+## Possible explanations (hypotheses)
+1. The principal lacks SELECT on main.crm.customers [E1]
+## 11. Next Steps & Recommended Actions
+- check the grants [E1]
+## 12. Investigation Scope & Limitations
+- E2 is a similar case from another run [E2]"""
+    assert check_answer(formatted, BUNDLE, CTX, resp()) == ()

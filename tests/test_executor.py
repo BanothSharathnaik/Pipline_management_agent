@@ -50,7 +50,7 @@ def hashing_pipeline():
     chunks = chunk_documents(CORPUS)
     idx = VectorIndex(e.dim, e.model_name)
     idx.add(chunks, embed_chunks(chunks, e))
-    return RetrievalPipeline(idx, e, known_run_ids=[r.run_id for r in RUNS])
+    return RetrievalPipeline(idx, e, known_run_ids=[r.run_id for r in RUNS], min_score=0.15)
 
 
 def ask(question, llm=None, factory=no_pipeline):

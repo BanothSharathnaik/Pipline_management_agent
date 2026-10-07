@@ -24,6 +24,7 @@ DOCS = [
 
 
 def build(**kw):
+    kw.setdefault("min_score", 0.15)
     e = HashingEmbedder(dim=4096)
     chunks = chunk_documents(DOCS)
     idx = VectorIndex(e.dim, e.model_name)

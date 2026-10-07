@@ -35,6 +35,7 @@ def build_incident_report(
     now: Optional[datetime] = None,
     data_note: Optional[str] = None,
     top_k: int = 5,
+    min_score: Optional[float] = None,
 ) -> IncidentReport:
     """Builds an incident report for a run with deterministic facts and optional unverified LLM hypotheses."""
     current_time = now or datetime.now(timezone.utc)
@@ -160,7 +161,7 @@ def build_incident_report(
     ctx: Optional[RunContext] = None
     if pipeline is not None:
         query_text = f"Why did run {target_run.run_id} fail?"
-        ctx = retrieve_for_question(pipeline, query_text, all_runs, top_k=top_k, docs=docs)
+        ctx = retrieve_for_question(pipeline, query_text, all_runs, top_k=top_k, docs=docs, min_score=min_score)
         linked = ctx.report.run_evidence.get(target_run.run_id, [])
         related = ctx.report.related.results
 

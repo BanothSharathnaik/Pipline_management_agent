@@ -7,8 +7,8 @@ from typing import Optional, Sequence
 
 from src.retrieval.vector_index import VectorResult
 
-# Provisional: fitted to six probe queries with all-MiniLM-L6-v2. Re-measure in Phase 11.
-DEFAULT_MIN_SCORE = 0.15
+# Cosine similarity threshold for vector retrieval (min_score = 0.5)
+DEFAULT_MIN_SCORE = 0.5
 
 
 @dataclass(frozen=True)

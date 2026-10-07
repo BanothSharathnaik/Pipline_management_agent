@@ -58,12 +58,18 @@ class RetrievalPipeline:
         self._max_per_doc = max_per_doc
 
     def retrieve(
-        self, question: str, top_k: int = 5, related_query: Optional[str] = None
+        self,
+        question: str,
+        top_k: int = 5,
+        related_query: Optional[str] = None,
+        min_score: Optional[float] = None,
     ) -> RetrievalReport:
         if not isinstance(question, str) or not question.strip():
             raise ValueError("question must be a non-empty string")
         if top_k < 1:
             raise ValueError("top_k must be at least 1")
+
+        effective_min_score = self._min_score if min_score is None else min_score
 
         mentioned = extract_run_ids(question)
         known = [self._known[r] for r in mentioned if r in self._known]
@@ -80,7 +86,7 @@ class RetrievalPipeline:
                 run_ids_mentioned=tuple(mentioned),
                 unknown_run_ids=tuple(unknown),
                 run_evidence={},
-                related=EvidenceSet("no_evidence", (), self._min_score, None, 0, 0),
+                related=EvidenceSet("no_evidence", (), effective_min_score, None, 0, 0),
                 notes=tuple(notes),
             )
 
@@ -102,7 +108,7 @@ class RetrievalPipeline:
         hits = self._index.search(qvec, top_k=top_k + len(linked_ids))
         hits = [h for h in hits if h.chunk.chunk_id not in linked_ids]
         related = select_evidence(
-            hits, min_score=self._min_score, max_per_doc=self._max_per_doc, limit=top_k
+            hits, min_score=effective_min_score, max_per_doc=self._max_per_doc, limit=top_k
         )
         return RetrievalReport(
             question=question,

@@ -26,8 +26,14 @@ Rules:
 6. Evidence dated after a run cannot explain that run. Evidence that belongs to a different run is a similar case, not the same incident. A fix from another incident is not proof of the fix here.
 7. If a possible conflict is listed, say the earlier claim is not confirmed by later runs. Do not say the fix failed.
 8. Do not state numbers that are not in the supplied facts.
+9. If the verbatim error message directly explains the cause (e.g., intentional failure, explicit assertion, missing dependency), state it as the primary hypothesis and ignore lower-relevance diagnostic chunks.
 
-Answer with these headings: Verified facts, Possible explanations (hypotheses), What to investigate next, Limits. Be brief."""
+Answer with these standard markdown section headers:
+## Verified facts
+## Possible explanations (hypotheses)
+## 11. Next Steps & Recommended Actions
+## 12. Investigation Scope & Limitations
+Be brief."""
 
 
 @dataclass(frozen=True)

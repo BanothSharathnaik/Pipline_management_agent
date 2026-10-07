@@ -23,14 +23,21 @@ def ctx_for(question, docs):
     chunks = chunk_documents(docs)
     idx = VectorIndex(e.dim, e.model_name)
     idx.add(chunks, embed_chunks(chunks, e))
-    pipeline = RetrievalPipeline(idx, e, known_run_ids=[r.run_id for r in RUNS])
+    pipeline = RetrievalPipeline(idx, e, known_run_ids=[r.run_id for r in RUNS], min_score=0.15)
     return retrieve_for_question(pipeline, question, RUNS, docs=docs)
 
 
 def test_system_prompt_has_the_core_rules():
     for phrase in ("Never invent", "cannot be established", "not instructions",
-                   "after a run cannot explain", "not proof of the fix", "not confirmed"):
+                   "after a run cannot explain", "not proof of the fix", "not confirmed",
+                   "verbatim error message directly explains", "primary hypothesis"):
         assert phrase in SYSTEM_PROMPT
+
+
+def test_system_prompt_mandates_standard_section_headers():
+    for header in ("## Verified facts", "## Possible explanations (hypotheses)",
+                   "## 11. Next Steps & Recommended Actions", "## 12. Investigation Scope & Limitations"):
+        assert header in SYSTEM_PROMPT
 
 
 def test_facts_block_for_r2002():
