@@ -1,0 +1,86 @@
+now = 2026-10-05T12:00:00+00:00  (explicit, never read from the clock)
+
+Why did my latest pipeline run fail?
+   -> latest_failed_diagnosis | structured=True retrieval=True | R2 latest run + diagnostic words
+      note: 'latest' means the most recent FAILED run, not the most recent run overall
+Which pipelines failed during the last 24 hours?
+   -> failed_list | structured=True retrieval=False | R8 failed runs
+      note: time window: last 24 hours (2026-10-04 12:00 to 2026-10-05 12:00 UTC, start inclusive, end exclusive)
+What was the error in run r2002?
+   -> run_diagnosis | structured=True retrieval=True | R1 run id + diagnostic words
+      run ids: ['r2002']
+Have similar errors occurred previously?
+   -> history | structured=False retrieval=True | R4 earlier occurrences
+What are the possible causes of this failure?
+   -> explain | structured=False retrieval=True | R7 explain, no run id
+      note: no run ID in the question: answering from retrieved evidence only; name a run (e.g. 'run r2002') for run-specific facts
+Which pipelines have unusually long execution times?
+   -> unsupported_duration | structured=False retrieval=False | R5 duration without a threshold
+      note: no threshold given: say e.g. 'exceeded 20 minutes', or ask for the longest run
+How has pipeline execution duration changed over time?
+   -> unsupported_duration | structured=False retrieval=False | R5 duration trend
+      note: duration trends over time are not implemented yet; ask for the longest run, or give a threshold such as 'exceeded 20 minutes'
+Are there recurring errors across multiple pipeline runs?
+   -> repeats | structured=True retrieval=False | R3 recurring errors
+      note: only exactly repeated error messages are grouped; similar wording is found by asking 'have we seen this error before?'
+Which upstream pipeline might be related to the failure of run r3004?
+   -> run_diagnosis | structured=True retrieval=True | R1 run id + diagnostic words
+      run ids: ['r3004']
+      note: no dependency lookup between runs exists yet: related evidence is similarity only and does not establish an upstream link
+What happened during run r2002?
+   -> run_details | structured=True retrieval=False | R1 run id
+      run ids: ['r2002']
+Which pipelines failed yesterday?
+   -> failed_list | structured=True retrieval=False | R8 failed runs
+      note: time window: yesterday (UTC) (2026-10-04 00:00 to 2026-10-05 00:00 UTC, start inclusive, end exclusive)
+Why did run 123 fail?
+   -> run_diagnosis | structured=True retrieval=True | R1 run id + diagnostic words
+      run ids: ['123']
+Have we seen this error before?
+   -> history | structured=False retrieval=True | R4 earlier occurrences
+Which pipeline had the longest runtime last week?
+   -> longest | structured=True retrieval=False | R5 longest run
+      note: time window: last week (rolling 7 days) (2026-09-28 12:00 to 2026-10-05 12:00 UTC, start inclusive, end exclusive)
+Explain why execution times may have increased.
+   -> unsupported_duration | structured=False retrieval=False | R5 duration trend
+      note: duration trends over time are not implemented yet; ask for the longest run, or give a threshold such as 'exceeded 20 minutes'
+How many failures occurred in the last 24 hours?
+   -> count_failures | structured=True retrieval=False | R6 failure count
+      note: time window: last 24 hours (2026-10-04 12:00 to 2026-10-05 12:00 UTC, start inclusive, end exclusive)
+Which runs exceeded 10 minutes?
+   -> slow_threshold | structured=True retrieval=False | R5 duration threshold
+      threshold: 600s
+Which runs took longer than 1800 seconds in the last 7 days?
+   -> slow_threshold | structured=True retrieval=False | R5 duration threshold
+      threshold: 1800s
+      note: time window: last 7 days (2026-09-28 12:00 to 2026-10-05 12:00 UTC, start inclusive, end exclusive)
+Give me a summary of pipeline health
+   -> summary | structured=True retrieval=False | R9 summary
+Why is it so slow?
+   -> explain | structured=False retrieval=True | R7 explain, no run id
+      note: no run ID in the question: answering from retrieved evidence only; name a run (e.g. 'run r2002') for run-specific facts
+how do I bake bread
+   -> unrouted | structured=False retrieval=True | R10 no rule matched
+      note: no routing rule matched: searching the diagnostic evidence only
+Why did the pipeline fail?
+   -> explain | structured=False retrieval=True | R7 explain, no run id
+      note: no run ID in the question: answering from retrieved evidence only; name a run (e.g. 'run r2002') for run-specific facts
+What is the most recent run?
+   -> latest_details | structured=True retrieval=False | R2 latest run
+What is the latest run?
+   -> latest_details | structured=True retrieval=False | R2 latest run
+How many runs failed in 2026?
+   -> count_failures | structured=True retrieval=False | R6 failure count
+compare run r2002 and run r2003
+   -> run_details | structured=True retrieval=False | R1 run id
+      run ids: ['r2002', 'r2003']
+Why did the pipeline fail yesterday?
+   -> explain | structured=False retrieval=True | R7 explain, no run id
+      note: no run ID in the question: answering from retrieved evidence only; name a run (e.g. 'run r2002') for run-specific facts
+Which runs failed in the last 0 hours?
+   -> failed_list | structured=True retrieval=False | R8 failed runs
+      note: ignored time window 'last 0 hours': out of range
+Which runs exceeded 5 minutes today?
+   -> slow_threshold | structured=True retrieval=False | R5 duration threshold
+      threshold: 300s
+      note: time window: today (UTC) (2026-10-05 00:00 to 2026-10-06 00:00 UTC, start inclusive, end exclusive)
