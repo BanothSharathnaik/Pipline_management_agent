@@ -8,29 +8,14 @@ from typing import Optional, Sequence
 
 from src.monitoring import queries as q
 from src.monitoring.collector import load_mock_runs
+from src.monitoring.formatting import fmt_run, run_detail_lines
 from src.monitoring.models import RunRecord
 
-DEFAULT_DATA = Path(__file__).resolve().parents[1] / "data" / "mock_runs.json"
-
-
-def fmt_duration(seconds: Optional[float]) -> str:
-    if seconds is None:
-        return "n/a"
-    total = int(seconds)
-    return f"{total // 60}m{total % 60:02d}s"
-
-
-def fmt_time(dt: Optional[datetime]) -> str:
-    if dt is None:
-        return "n/a"
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-
-def fmt_run(r: RunRecord) -> str:
-    return (
-        f"{r.run_id}  {r.job_name or r.job_id}  {r.result_state.value}  "
-        f"{fmt_time(r.start_time)}  {fmt_duration(r.duration_seconds)}"
-    )
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_DATA = ROOT / "data" / "mock_runs.json"
+DOC_DIR = ROOT / "data" / "diagnostic_documents"
+DEMO_DIR = ROOT / "data" / "conflict_demo"
+CACHE_PATH = ROOT / "data" / "cache" / "embeddings.npz"
 
 
 def print_runs(runs: Sequence[RunRecord], empty_message: str) -> None:
@@ -42,23 +27,7 @@ def print_runs(runs: Sequence[RunRecord], empty_message: str) -> None:
 
 
 def print_run_detail(r: RunRecord) -> None:
-    print(f"Run:        {r.run_id}  (job {r.job_id}, {r.job_name or 'unnamed'})")
-    print(f"Source:     {r.source}")
-    print(f"Result:     {r.result_state.value}")
-    print(f"Lifecycle:  {r.lifecycle_state or 'n/a'}")
-    print(f"Started:    {fmt_time(r.start_time)}")
-    print(f"Ended:      {fmt_time(r.end_time)}")
-    print(f"Duration:   {fmt_duration(r.duration_seconds)}")
-    print(f"Error:      {r.error_message or '(no error message recorded)'}")
-    if r.tasks:
-        print("Tasks:")
-        for t in r.tasks:
-            deps = ",".join(t.depends_on) if t.depends_on else "-"
-            print(f"  - {t.task_key}  {t.result_state.value}  depends_on=[{deps}]")
-            if t.error_message:
-                print(f"      error: {t.error_message}")
-    else:
-        print("Tasks:      (none recorded)")
+    print("\n".join(run_detail_lines(r)))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -83,7 +52,58 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("run", help="details of one run")
     s.add_argument("run_id")
+
+    s = sub.add_parser("ask", help="ask a natural-language question")
+    s.add_argument("question")
+    s.add_argument("--no-llm", action="store_true", help="never call the language model")
+    s.add_argument("--with-conflict-demo", action="store_true",
+                   help="also index the planted conflict document HIST-003")
+    s.add_argument("--top-k", type=int, default=5)
     return p
+
+
+def _build_pipeline(docs, runs):
+    """Slow part (loads the embedding model). Only called when a question needs retrieval."""
+    from src.ingestion.chunker import chunk_document
+    from src.retrieval.chunk_embeddings import EmbeddingCache, embed_chunks
+    from src.retrieval.embeddings import load_embedder
+    from src.retrieval.search import RetrievalPipeline
+    from src.retrieval.vector_index import VectorIndex
+
+    embedder = load_embedder()
+    chunks = [c for d in docs for c in chunk_document(d)]
+    try:
+        cache = EmbeddingCache.load(CACHE_PATH, embedder.model_name, embedder.dim)
+    except (FileNotFoundError, ValueError):
+        cache = EmbeddingCache(embedder.model_name, embedder.dim)
+    vectors = embed_chunks(chunks, embedder, cache)
+    cache.save(CACHE_PATH)
+    index = VectorIndex(embedder.dim, embedder.model_name)
+    index.add(chunks, vectors)
+    return RetrievalPipeline(index, embedder, known_run_ids=[r.run_id for r in runs])
+
+
+def _run_ask(args, now: datetime, runs: Sequence[RunRecord]) -> int:
+    from src.generation.llm_client import OllamaClient
+    from src.ingestion.parser import load_documents
+    from src.retrieval.embeddings import EmbeddingError
+    from src.routing.executor import DisabledLLM, answer_question
+
+    try:
+        docs = []
+        for directory in [DOC_DIR] + ([DEMO_DIR] if args.with_conflict_demo else []):
+            loaded_docs = load_documents(directory)
+            docs.extend(loaded_docs.docs)
+            for issue in loaded_docs.issues:
+                print(f"  document issue in {issue.filename}: {issue.message}")
+        llm = DisabledLLM() if args.no_llm else OllamaClient.from_env()
+        answer = answer_question(args.question, now, runs, lambda: _build_pipeline(docs, runs),
+                                 docs, llm, top_k=args.top_k)
+    except (ValueError, FileNotFoundError, EmbeddingError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(answer.text)
+    return 0
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -153,6 +173,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 1
         for r in found:
             print_run_detail(r)
+
+    elif cmd == "ask":
+        return _run_ask(args, now, runs)
 
     return 0
 
