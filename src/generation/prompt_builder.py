@@ -163,3 +163,36 @@ def build_prompt(ctx: RunContext, max_chars: int = DEFAULT_MAX_CHARS) -> PromptB
         f"prompt exceeds {max_chars} characters even without related evidence; "
         "raise max_chars or shorten the inputs"
     )
+
+
+def build_incident_prompt(run_facts: dict, evidence: list) -> str:
+    """Builds a structured prompt for incident diagnosis from run facts and evidence chunks."""
+    if evidence:
+        evidence_text = "\n".join(
+            [f"- [{item.get('chunk_id', 'REF')}] (Score: {float(item.get('score', 0)):.3f}): {item.get('text')}" 
+             for item in evidence]
+        )
+    else:
+        evidence_text = "No reference runbooks matched above threshold. Rely strictly on the verbatim error message."
+
+    prompt = f"""
+You are an expert Data Reliability Engineer analyzing a Databricks pipeline failure.
+
+### VERIFIED MONITORING FACTS
+- Run ID: {run_facts.get('run_id')}
+- Pipeline / Job Name: {run_facts.get('pipeline_name', run_facts.get('job_name'))}
+- Failed Task: {run_facts.get('task_name', 'N/A')}
+- Duration: {run_facts.get('duration_seconds')}s
+- Verbatim Error Output: {run_facts.get('error_message')}
+
+### RETRIEVED REFERENCE EVIDENCE
+{evidence_text}
+
+### INSTRUCTIONS
+1. Analyze the verbatim error message and relevant reference evidence.
+2. Provide a clear, technical explanation under two mandatory sections:
+   - **Probable Root Cause**: State why the failure occurred based on the error code/message.
+   - **Recommended Next Steps**: List concrete debugging actions (e.g., table verification commands, catalog checks, schema fixes).
+3. Distinguish confirmed facts from hypotheses. Do not invent table names, metrics, or error codes not present above.
+"""
+    return prompt.strip()
