@@ -27,6 +27,9 @@ def find_runs(runs: Sequence[RunRecord], run_id: str) -> list[RunRecord]:
     return [r for r in runs if r.run_id == run_id]
 
 
+get_run_details = find_runs
+
+
 def latest_run(runs: Sequence[RunRecord], job_id: Optional[str] = None) -> Optional[RunRecord]:
     """Run with the most recent start time. None if nothing qualifies."""
     candidates = [
@@ -34,6 +37,9 @@ def latest_run(runs: Sequence[RunRecord], job_id: Optional[str] = None) -> Optio
         if r.start_time is not None and (job_id is None or r.job_id == job_id)
     ]
     return max(candidates, key=lambda r: (r.start_time, r.run_id), default=None)
+
+
+get_latest_runs = latest_run
 
 
 def runs_in_window(
@@ -76,6 +82,9 @@ def failed_runs(
         if r.result_state in states and (job_id is None or r.job_id == job_id)
     ]
     return sorted(hits, key=_sort_key)
+
+
+get_failed_runs = failed_runs
 
 
 def count_failures(
