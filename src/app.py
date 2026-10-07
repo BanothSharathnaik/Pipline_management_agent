@@ -61,6 +61,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--max-runs", type=int, default=100)
     s.add_argument("--max-output-fetches", type=int, default=20)
 
+    s = sub.add_parser("report", help="generate a deterministic incident report for a run")
+    s.add_argument("run_id")
+    s.add_argument("--top-k", type=int, default=5)
+
     s = sub.add_parser("ask", help="ask a natural-language question")
     s.add_argument("question")
     s.add_argument("--no-llm", action="store_true", help="never call the language model")
@@ -230,9 +234,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for r in found:
             print_run_detail(r)
 
+    elif cmd == "report":
+        return _run_report(args, now, runs, data_note)
+
     elif cmd == "ask":
         return _run_ask(args, now, runs, data_note)
 
+    return 0
+
+
+def _run_report(args, now: datetime, runs: Sequence[RunRecord], data_note: Optional[str]) -> int:
+    from src.ingestion.parser import load_documents
+    from src.reporting.incident_report import build_incident_report
+
+    found = q.find_runs(runs, args.run_id)
+    if not found:
+        print(f"error: run {args.run_id} not found", file=sys.stderr)
+        return 1
+    target = found[0]
+
+    docs = []
+    pipeline = None
+    try:
+        if DOC_DIR.is_dir():
+            docs = load_documents(DOC_DIR).docs
+            if docs:
+                pipeline = _build_pipeline(docs, runs)
+    except Exception as exc:
+        print(f"warning: could not load retrieval pipeline: {exc}", file=sys.stderr)
+
+    report = build_incident_report(
+        target_run=target,
+        all_runs=runs,
+        pipeline=pipeline,
+        docs=docs,
+        now=now,
+        data_note=data_note,
+        top_k=args.top_k,
+    )
+    print(report.text)
     return 0
 
 

@@ -67,3 +67,39 @@ def test_tasks_parse_with_dependencies():
     )
     assert len(r.tasks) == 2
     assert r.tasks[1].depends_on == ("ingest",)
+
+
+def test_task_attempts_default_and_custom():
+    r = RunRecord.from_dict(
+        base(tasks=[
+            {"task_key": "ingest", "result_state": "success"},
+            {"task_key": "transform", "result_state": "failed", "attempts": 3},
+        ])
+    )
+    assert r.tasks[0].attempts == 1
+    assert r.tasks[1].attempts == 3
+
+
+@pytest.mark.parametrize("bad_attempts", [0, -1, "2", True, False, 1.5])
+def test_invalid_task_attempts_raises(bad_attempts):
+    with pytest.raises(ValueError, match="attempts must be a positive integer"):
+        RunRecord.from_dict(
+            base(tasks=[
+                {"task_key": "t1", "attempts": bad_attempts}
+            ])
+        )
+
+
+def test_run_queue_seconds_valid():
+    r = RunRecord.from_dict(base(queue_seconds=12.5))
+    assert r.queue_seconds == 12.5
+    r2 = RunRecord.from_dict(base(queue_seconds=0))
+    assert r2.queue_seconds == 0.0
+    r3 = RunRecord.from_dict(base(queue_seconds=None))
+    assert r3.queue_seconds is None
+
+
+@pytest.mark.parametrize("bad_queue", [-1, -0.5, True, False, "10"])
+def test_invalid_run_queue_seconds_raises(bad_queue):
+    with pytest.raises(ValueError, match="queue_seconds must be a non-negative number"):
+        RunRecord.from_dict(base(queue_seconds=bad_queue))
