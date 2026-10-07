@@ -7,3 +7,4 @@ __pycache__/
 *.npy
 .ipynb_checkpoints/
 data/cache/
+data/raw_samples/
