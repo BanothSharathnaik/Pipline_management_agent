@@ -73,9 +73,6 @@ class DatabricksClient:
         if not token:
             raise ValueError("token must not be blank")
         parsed = urlparse(host)
-        if parsed.scheme in ("https", "http") and parsed.netloc:
-            host = f"{parsed.scheme}://{parsed.netloc}"
-            parsed = urlparse(host)
         if (parsed.scheme not in ("https", "http") or not parsed.netloc
                 or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
             raise ValueError("host must look like https://dbc-xxxx.cloud.databricks.com (no path)")
@@ -104,6 +101,9 @@ class DatabricksClient:
         if not host or not token:
             raise ValueError("DATABRICKS_HOST and DATABRICKS_TOKEN must be set "
                              "(fill .env, then: set -a; source .env; set +a)")
+        parsed = urlparse(host.strip())
+        if parsed.scheme in ("https", "http") and parsed.netloc:
+            host = f"{parsed.scheme}://{parsed.netloc}"
         return cls(host, token, **kwargs)
 
     # --- public, read-only operations -----------------------------------------------------

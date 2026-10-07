@@ -256,8 +256,9 @@ def build_incident_report(
             "> They are hypotheses to guide investigation, NOT confirmed causes. The facts above are authoritative.\n"
         )
         if ctx is not None:
+            retrieved_chunks = list(ctx.report.run_evidence.get(target_run.run_id, [])) + list(ctx.report.related.results)
             try:
-                llm_response = generate_answer(ctx, llm)
+                llm_response = generate_answer(ctx, llm, fallback_direct_error=True)
                 if llm_response.llm_used and llm_response.model_text:
                     llm_used = True
                     lines.append(llm_response.model_text.strip())
@@ -266,10 +267,16 @@ def build_incident_report(
                         for w in llm_response.warnings:
                             lines.append(f"- WARNING: {w}")
                 else:
-                    lines.append(
-                        "No explanation generated: verified facts alone or available evidence "
-                        "were insufficient to establish an explanation."
-                    )
+                    if not retrieved_chunks and not target_run.error_message:
+                        lines.append(
+                            "No diagnostic documents met the similarity threshold, "
+                            "and no detailed error message was provided in telemetry."
+                        )
+                    else:
+                        lines.append(
+                            "No explanation generated: verified facts alone or available evidence "
+                            "were insufficient to establish an explanation."
+                        )
             except Exception as exc:
                 lines.append(f"Language model generation failed: {exc}")
         else:
