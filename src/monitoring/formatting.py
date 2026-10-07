@@ -35,13 +35,16 @@ def run_detail_lines(r: RunRecord) -> list[str]:
         f"Started:    {fmt_time(r.start_time)}",
         f"Ended:      {fmt_time(r.end_time)}",
         f"Duration:   {fmt_duration(r.duration_seconds)}",
-        f"Error:      {r.error_message or '(no error message recorded)'}",
     ]
+    if r.queue_seconds is not None:
+        lines.append(f"Queued:     {fmt_duration(r.queue_seconds)} (may be included in the duration above)")
+    lines.append(f"Error:      {r.error_message or '(no error message recorded)'}")
     if r.tasks:
         lines.append("Tasks:")
         for t in r.tasks:
             deps = ",".join(t.depends_on) if t.depends_on else "-"
-            lines.append(f"  - {t.task_key}  {t.result_state.value}  depends_on=[{deps}]")
+            retries = f"  attempts={t.attempts}" if t.attempts > 1 else ""
+            lines.append(f"  - {t.task_key}  {t.result_state.value}  depends_on=[{deps}]{retries}")
             if t.error_message:
                 lines.append(f"      error: {t.error_message}")
     else:

@@ -70,6 +70,7 @@ class TaskRecord:
     end_time: Optional[datetime]
     error_message: Optional[str]
     depends_on: tuple[str, ...]
+    attempts: int = 1
 
     @property
     def duration_seconds(self) -> Optional[float]:
@@ -77,6 +78,9 @@ class TaskRecord:
 
     @classmethod
     def from_dict(cls, data: dict) -> "TaskRecord":
+        attempts = data.get("attempts", 1)
+        if isinstance(attempts, bool) or not isinstance(attempts, int) or attempts < 1:
+            raise ValueError("attempts must be a positive integer")
         return cls(
             task_key=_require(data, "task_key"),
             result_state=_parse_state(data.get("result_state")),
@@ -84,6 +88,7 @@ class TaskRecord:
             end_time=_parse_time(data.get("end_time")),
             error_message=_clean_text(data.get("error_message")),
             depends_on=tuple(data.get("depends_on") or ()),
+            attempts=attempts,
         )
 
 
@@ -99,6 +104,7 @@ class RunRecord:
     error_message: Optional[str]
     tasks: tuple[TaskRecord, ...]
     source: str  # "mock" or "live"
+    queue_seconds: Optional[float] = None
 
     @property
     def duration_seconds(self) -> Optional[float]:
@@ -109,6 +115,9 @@ class RunRecord:
         source = _require(data, "source")
         if source not in VALID_SOURCES:
             raise ValueError(f"source must be one of {sorted(VALID_SOURCES)}, got {source!r}")
+        queue = data.get("queue_seconds")
+        if queue is not None and (isinstance(queue, bool) or not isinstance(queue, (int, float)) or queue < 0):
+            raise ValueError("queue_seconds must be a non-negative number")
         return cls(
             run_id=_require(data, "run_id"),
             job_id=_require(data, "job_id"),
@@ -120,4 +129,5 @@ class RunRecord:
             error_message=_clean_text(data.get("error_message")),
             tasks=tuple(TaskRecord.from_dict(t) for t in data.get("tasks") or ()),
             source=source,
+            queue_seconds=float(queue) if queue is not None else None,
         )
