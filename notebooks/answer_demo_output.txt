@@ -1,0 +1,200 @@
+[MOCK DATA] model llama3.2:3b
+
+=== VERIFIED MONITORING DATA AND RETRIEVED EVIDENCE ===
+Question: Why did run r2003 fail?
+Verified run facts (monitoring data, source=mock):
+  run r2003 | job customer_etl (j_cust) | FAILED
+  started 2026-10-03 02:00 UTC | ended 2026-10-03 02:03 UTC | duration 3m45s
+  error: PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r2003 as the query, not the question
+
+Evidence linked to run r2003 (by run_id metadata; score is not relevance):
+  1. ERR-003#0  score=0.870  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. HIST-003#0  score=0.782  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+       relation to run r2003: before this run
+  2. ERR-002#0  score=0.687  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r2003: before this run
+  3. TS-002#0  score=0.498  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r2003: undated
+  4. HIST-001#0  score=0.489  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r2003: before this run
+  5. ERR-004#0  score=0.312  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+       relation to run r2003: after this run
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+=== GENERATED EXPLANATION (written by a language model; NOT verified; the data above is authoritative) ===
+<Verified facts>
+- Run r2003 failed with a result of FAILED.
+- The job customer_etl (j_cust) started on 2026-10-03 02:00 UTC and ended in 2026-10-03 02:03 UTC.
+- The error message was PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers.
+- The error occurred at the first task.
+</Verified facts>
+
+<Possible explanations (hypotheses)>
+1. The principal lacks SELECT privilege on main.crm.customers.
+2. The permission denied error was investigated and resolved before run r2003 started.
+3. The permission denied error was caused by a similar issue in a previous run (r2002).
+4. The permission denied error was caused by a configuration issue with the table schema or catalog.
+5. The permission denied error was caused by a new service account that could not create tables.
+
+</Possible explanations (hypotheses)>
+
+<What to investigate next>
+- Verify that the principal has the necessary SELECT privilege on main.crm.customers.
+- Check the table schema and catalog for any configuration issues.
+- Investigate the new service account and its permissions.
+
+</What to investigate next>
+
+<Limits>
+- Evidence E1 is linked to run r2003 and shows the error message.
+- Evidence E2 is similar to E1 but belongs to a different run (r2002) and is not tied to a specific run.
+- Evidence E3 is similar to E1 but belongs to a different run (r2002) and is not tied to a specific run.
+- Evidence E4 is a troubleshooting guide and not specific to run r2003.
+- Evidence E5 is a historical failure and not specific to run r2003.
+- Evidence E6 is a failure in a different run (r3004) and is not relevant to run r2003.
+</Limits>
+
+=== AUTOMATIC CHECKS ===
+WARNING: 5 of 5 explanation lines cite no evidence or fact ID
+
+[llm_used=True, warnings=1]
+
+##############################################################################
+
+=== VERIFIED MONITORING DATA AND RETRIEVED EVIDENCE ===
+Question: Why did run r3004 fail?
+Verified run facts (monitoring data, source=mock):
+  run r3004 | job daily_sales_agg (j_sales) | FAILED
+  started 2026-10-04 04:00 UTC | ended 2026-10-04 04:00 UTC | duration 0m05s
+  error: AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found.
+  failed tasks: (none) | skipped tasks: (none)
+NOTE: similarity search used the recorded error message of run r3004 as the query, not the question
+
+Evidence linked to run r3004 (by run_id metadata; score is not relevance):
+  1. ERR-004#0  score=0.926  run=r3004  source=mock  file=err_004_table_not_found.txt  chars=0-211  ts=2026-10-04T04:00:05+00:00
+       AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found. Verify the spelling and correctness of the schema a...
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-001#0  score=0.546  run=r1004  source=mock  file=err_001_unresolved_column.txt  chars=0-250  ts=2026-10-04T01:02:15+00:00
+       Task load failed. AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column with name `order_total` cannot be resolved. Did you mean one of the followi...
+       relation to run r3004: before this run
+  2. TS-002#0  score=0.458  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+       relation to run r3004: undated
+  3. HIST-003#0  score=0.397  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+       relation to run r3004: before this run
+  4. HIST-001#0  score=0.396  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+       relation to run r3004: before this run
+  5. ERR-002#0  score=0.366  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+       relation to run r3004: before this run
+
+=== GENERATED EXPLANATION (written by a language model; NOT verified; the data above is authoritative) ===
+<Verified facts>
+- Run r3004 failed with a result of FAILED.
+- The error message is AnalysisException: [TABLE_OR_VIEW_NOT_FOUND] The table or view `main.sales.orders_clean` cannot be found.
+- The task failed 5 seconds after it started.
+</Verified facts>
+
+<Possible explanations (hypotheses)>
+1. The table or view `main.sales.orders_clean` does not exist in the schema or catalog. ([F1] evidence)
+2. The ETL principal does not have the necessary permissions to access the `main.crm.customers` table. ([E4] evidence)
+3. The service account used by the ETL principal does not have the necessary permissions to create tables in the `main.sales` schema. ([E5] evidence)
+4. There is an unresolved column in the `orders` load that is causing the task to fail. ([E2] evidence)
+5. Permission denied errors are occurring due to missing SELECT, USE SCHEMA, or USE CATALOG privileges. ([E3] evidence)
+</Possible explanations (hypotheses)>
+
+=== AUTOMATIC CHECKS ===
+WARNING: names objects that are not in this run's own facts or linked evidence (they may come from other runs' evidence, or be invented): main.crm.customers
+WARNING: the answer is missing sections: what to investigate next, limits
+
+[llm_used=True, warnings=2]
+
+##############################################################################
+
+=== VERIFIED MONITORING DATA AND RETRIEVED EVIDENCE ===
+Question: Why did run r9999 fail?
+NOTE: run r9999 not found in monitoring data; its status and errors cannot be established
+NOTE: semantic search skipped: no mentioned run exists in the monitoring data
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  no evidence above min score 0.15
+
+=== NO EXPLANATION GENERATED ===
+Nothing in the monitoring data or retrieved evidence supports an explanation, so the language model was not called.
+
+[llm_used=False, warnings=0]
+
+##############################################################################
+
+=== VERIFIED MONITORING DATA AND RETRIEVED EVIDENCE ===
+Question: how do I bake bread
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  no evidence above min score 0.15 (best match scored 0.114)
+
+=== NO EXPLANATION GENERATED ===
+Nothing in the monitoring data or retrieved evidence supports an explanation, so the language model was not called.
+
+[llm_used=False, warnings=0]
+
+##############################################################################
+
+=== VERIFIED MONITORING DATA AND RETRIEVED EVIDENCE ===
+Question: Have we seen this permission error before?
+
+Related evidence (similarity only; may belong to OTHER runs; not proof):
+  1. ERR-002#0  score=0.499  run=r2002  source=mock  file=err_002_permission_select.txt  chars=0-164  ts=2026-10-02T02:03:30+00:00
+       Task ingest_customers failed. PermissionDenied: User does not have SELECT on table main.crm.customers Downstream tasks transform_customers and publish were s...
+  2. ERR-003#0  score=0.458  run=r2003  source=mock  file=err_003_permission_select_variant.txt  chars=0-103  ts=2026-10-03T02:03:45+00:00
+       Run failed at the first task. PERMISSION_DENIED: principal lacks SELECT privilege on main.crm.customers
+  3. HIST-003#0  score=0.446  run=n/a  source=mock  file=hist_003_customers_grant.txt  chars=0-185  ts=2026-10-02T09:00:00+00:00
+       Permission denied on main.crm.customers was investigated after the customer_etl failure. SELECT on main.crm.customers was granted to the ETL principal. Acces...
+  4. TS-002#0  score=0.425  run=n/a  source=mock  file=ts_002_permissions.txt  chars=0-251  ts=n/a
+       For permission denied errors, identify the principal the job runs as. Use SHOW GRANTS on the table to see which privileges exist. Missing SELECT, USE SCHEMA,...
+  5. HIST-001#0  score=0.378  run=n/a  source=mock  file=hist_001_create_table_permission.txt  chars=0-217  ts=2026-08-12T00:00:00+00:00
+       A new service account failed with a permission error when writing to schema main.sales. The account had USE SCHEMA but no CREATE TABLE privilege. Resolved by...
+
+POSSIBLE CONFLICTS (rule-based check of documents against monitoring data):
+  HIST-003 (file hist_003_customers_grant.txt) claims resolved at 2026-10-02 09:00 UTC, but run r2003 started 2026-10-03 02:00 UTC, ended in a failure state, and its error names main.crm.customers.
+  This does not prove the fix failed (the cause may differ). It means the claim is not confirmed by later runs.
+
+=== GENERATED EXPLANATION (written by a language model; NOT verified; the data above is authoritative) ===
+<Verified facts>
+No verified facts are available for this question.
+</Verified facts>
+
+<Possible explanations (hypotheses)>
+1. The permission error is a new issue (Hypothesis 1, supported by E1 and E2).
+2. The permission error is related to a previous issue (Hypothesis 2, supported by E3 and E5).
+3. The permission error is due to a misconfiguration (Hypothesis 3, supported by E4).
+</Possible explanations (hypotheses)>
+
+<What to investigate next>
+Investigate the configuration of the service account and the privileges granted to it, and check the SHOW GRANTS on the table to see which privileges exist.
+
+<Limits>
+The available evidence does not provide enough information to confirm the cause of the permission error.
+
+=== AUTOMATIC CHECKS ===
+no problems found by the automatic checks (the checks are limited and do not prove the explanation is correct)
+
+[llm_used=True, warnings=0]
+
+##############################################################################
+
