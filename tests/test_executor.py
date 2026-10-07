@@ -7,6 +7,7 @@ from src.generation.llm_client import LLMResponse
 from src.ingestion.chunker import chunk_documents
 from src.ingestion.parser import load_documents
 from src.monitoring.collector import load_mock_runs
+from src.monitoring.models import RunRecord
 from src.retrieval.chunk_embeddings import embed_chunks
 from src.retrieval.embeddings import HashingEmbedder
 from src.retrieval.search import RetrievalPipeline
@@ -194,3 +195,44 @@ def test_banner_reflects_source_labels():
     live = [r for r in RUNS[:1]]
     assert answer_question("Which pipelines failed?", NOW, live, no_pipeline, CORPUS,
                            FakeLLM()).text.startswith("[MOCK DATA] 1 runs loaded")
+
+
+LIVE = RunRecord.from_dict({
+    "run_id": "1001", "job_id": "9", "job_name": "JOB-X", "source": "live",
+    "result_state": "FAILED", "start_time": "2026-10-07T03:00:00+00:00",
+    "end_time": "2026-10-07T03:01:00+00:00", "error_message": "Exception: Deliberate failure",
+})
+
+
+def empty_pipeline():
+    e = HashingEmbedder(dim=64)
+    return RetrievalPipeline(VectorIndex(e.dim, e.model_name), e, known_run_ids=["1001"])
+
+
+def test_facts_without_any_evidence_do_not_call_the_model():
+    llm = FakeLLM()
+    out = answer_question("Why did run 1001 fail?", NOW, [LIVE], empty_pipeline, CORPUS, llm)
+    assert llm.calls == [] and out.llm_used is False
+    assert out.text.startswith("[LIVE DATA] 1 runs loaded")
+    assert "Exception: Deliberate failure" in out.text
+    assert "no diagnostic evidence matched it" in out.text
+    assert "language model was not called" in out.text
+
+
+def test_live_runs_get_the_mock_documents_note():
+    text = answer_question("Which pipelines failed?", NOW, [LIVE], no_pipeline, CORPUS, FakeLLM()).text
+    assert "not written about these live runs" in text
+    mock_text = answer_question("Which pipelines failed?", NOW, RUNS, no_pipeline, CORPUS, FakeLLM()).text
+    assert "not written about these live runs" not in mock_text
+
+
+def test_mixed_sources_are_labelled_in_the_banner():
+    text = answer_question("Which pipelines failed?", NOW, RUNS[:1] + [LIVE], no_pipeline,
+                           CORPUS, FakeLLM()).text
+    assert text.startswith("[LIVE/MOCK DATA] 2 runs loaded")
+
+
+def test_data_note_is_shown():
+    text = answer_question("Which pipelines failed?", NOW, [LIVE], no_pipeline, CORPUS, FakeLLM(),
+                           data_note="live snapshot fetched earlier").text
+    assert "Data note: live snapshot fetched earlier" in text

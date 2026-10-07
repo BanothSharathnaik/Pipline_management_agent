@@ -181,10 +181,16 @@ def answer_question(
     docs: Sequence[Document],
     llm: LLM,
     top_k: int = 5,
+    data_note: Optional[str] = None,
 ) -> Answer:
     route = route_question(question, now)
-    head = [
-        _banner(runs),
+    head = [_banner(runs)]
+    if data_note:
+        head.append(f"Data note: {data_note}")
+    if any(r.source == "live" for r in runs) and any(d.source == "mock" for d in docs):
+        head.append("NOTE: the diagnostic documents are source=mock sample documents, not written about "
+                    "these live runs; read any match as general reference only")
+    head += [
         f"Question: {question}",
         f"Route: {route.intent} (rule: {route.matched_rule}) | "
         f"structured={route.needs_structured} retrieval={route.needs_retrieval}",

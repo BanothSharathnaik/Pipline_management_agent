@@ -137,9 +137,12 @@ def render_response(
             "The verified data and retrieved evidence above are still valid.",
         ]
     elif nothing_to_explain:
-        lines += [
-            "=== NO EXPLANATION GENERATED ===",
-            "Nothing in the monitoring data or retrieved evidence supports an explanation, "
-            "so the language model was not called.",
-        ]
+        if ctx.facts:
+            reason = ("The monitoring data above is verified, but no diagnostic evidence matched it, "
+                      "so no cause can be established from the available information and the "
+                      "language model was not called.")
+        else:
+            reason = ("Nothing in the monitoring data or retrieved evidence supports an explanation, "
+                      "so the language model was not called.")
+        lines += ["=== NO EXPLANATION GENERATED ===", reason]
     return "\n".join(lines)

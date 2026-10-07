@@ -9,8 +9,8 @@ from src.retrieval.run_context import RunContext
 def generate_answer(ctx: RunContext, llm: LLM, max_chars: int = PROMPT_BUDGET_CHARS) -> FinalResponse:
     """Facts and evidence are always shown. The model is called only when there is something to explain."""
     rep = ctx.report
-    has_material = bool(ctx.facts) or any(rep.run_evidence.values()) or bool(rep.related.results)
-    if not has_material:
+    has_evidence = any(rep.run_evidence.values()) or bool(rep.related.results)
+    if not has_evidence:  # verified facts alone are not enough to explain anything
         text = render_response(ctx, None, (), None, nothing_to_explain=True)
         return FinalResponse(text, False, None, (), None)
 

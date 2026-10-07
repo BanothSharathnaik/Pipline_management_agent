@@ -308,3 +308,20 @@ def load_snapshot(path: str | Path = SNAPSHOT_PATH) -> LiveCollection:
         raise ValueError(f"live snapshot {p} is malformed")
     return build_collection(runs, outputs, fetched_at, bool(data.get("truncated")),
                             [str(w) for w in data.get("fetch_warnings") or []])
+
+
+def describe_age(fetched_at: datetime, now: datetime) -> str:
+    """How old a snapshot is, relative to an explicit 'now'."""
+    seconds = (now - fetched_at).total_seconds()
+    if seconds < 0:
+        return "newer than the reference time"
+    if seconds < 60:
+        return "less than a minute before now"
+    minutes = int(seconds // 60)
+    if minutes < 60:
+        return f"{minutes} minute{'s' if minutes != 1 else ''} before now"
+    hours = minutes // 60
+    if hours < 48:
+        return f"{hours} hour{'s' if hours != 1 else ''} before now"
+    days = hours // 24
+    return f"{days} day{'s' if days != 1 else ''} before now"

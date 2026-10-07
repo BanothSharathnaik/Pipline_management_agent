@@ -8,7 +8,7 @@ from typing import Optional, Sequence
 
 from src.monitoring import queries as q
 from src.monitoring.collector import load_mock_runs
-from src.monitoring.formatting import fmt_run, run_detail_lines
+from src.monitoring.formatting import fmt_run, fmt_time, run_detail_lines
 from src.monitoring.models import RunRecord
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,7 +32,11 @@ def print_run_detail(r: RunRecord) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="python3 -m src.app")
-    p.add_argument("--data", type=Path, default=DEFAULT_DATA, help="mock runs JSON file")
+    p.add_argument("--source", choices=["mock", "live"], default="mock",
+                   help="mock sample data (default) or the saved live snapshot")
+    p.add_argument("--data", type=Path, default=None, help="mock runs JSON file (mock source only)")
+    p.add_argument("--snapshot", type=Path, default=None,
+                   help="live snapshot file (default data/live/runs_snapshot.json)")
     p.add_argument("--now", help="ISO time with timezone; default is the current time")
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -53,6 +57,10 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("run", help="details of one run")
     s.add_argument("run_id")
 
+    s = sub.add_parser("collect", help="fetch live runs from Databricks (read-only) and save a snapshot")
+    s.add_argument("--max-runs", type=int, default=100)
+    s.add_argument("--max-output-fetches", type=int, default=20)
+
     s = sub.add_parser("ask", help="ask a natural-language question")
     s.add_argument("question")
     s.add_argument("--no-llm", action="store_true", help="never call the language model")
@@ -60,6 +68,33 @@ def build_parser() -> argparse.ArgumentParser:
                    help="also index the planted conflict document HIST-003")
     s.add_argument("--top-k", type=int, default=5)
     return p
+
+
+def _load_runs(args, now: datetime):
+    """Returns (runs, banner lines, data note). Mock and live data are never combined."""
+    if args.source == "live":
+        if args.data is not None:
+            raise ValueError("--data only applies to --source mock")
+        from src.monitoring.live_collector import SNAPSHOT_PATH, describe_age, load_snapshot
+
+        collection = load_snapshot(args.snapshot or SNAPSHOT_PATH)
+        age = describe_age(collection.fetched_at, now)
+        lines = [f"[LIVE DATA] {len(collection.runs)} runs from a snapshot fetched "
+                 f"{fmt_time(collection.fetched_at)} ({age})"]
+        if collection.truncated:
+            lines.append("  WARNING: the snapshot is truncated; older runs exist that are not shown")
+        lines += [f"  snapshot warning: {w}" for w in collection.warnings]
+        note = (f"live snapshot fetched {fmt_time(collection.fetched_at)} ({age}); "
+                "this is not real-time monitoring")
+        return list(collection.runs), lines, note
+
+    if args.snapshot is not None:
+        raise ValueError("--snapshot only applies to --source live")
+    loaded = load_mock_runs(args.data or DEFAULT_DATA)
+    lines = [f"[MOCK DATA] {len(loaded.runs)} runs loaded | {loaded.duplicates_dropped} duplicate dropped | "
+             f"{len(loaded.issues)} records rejected"]
+    lines += [f"  load issue at index {i.index} ({i.run_id}): {i.message}" for i in loaded.issues]
+    return loaded.runs, lines, None
 
 
 def _build_pipeline(docs, runs):
@@ -83,7 +118,7 @@ def _build_pipeline(docs, runs):
     return RetrievalPipeline(index, embedder, known_run_ids=[r.run_id for r in runs])
 
 
-def _run_ask(args, now: datetime, runs: Sequence[RunRecord]) -> int:
+def _run_ask(args, now: datetime, runs: Sequence[RunRecord], data_note: Optional[str]) -> int:
     from src.generation.llm_client import OllamaClient
     from src.ingestion.parser import load_documents
     from src.retrieval.embeddings import EmbeddingError
@@ -98,11 +133,30 @@ def _run_ask(args, now: datetime, runs: Sequence[RunRecord]) -> int:
                 print(f"  document issue in {issue.filename}: {issue.message}")
         llm = DisabledLLM() if args.no_llm else OllamaClient.from_env()
         answer = answer_question(args.question, now, runs, lambda: _build_pipeline(docs, runs),
-                                 docs, llm, top_k=args.top_k)
+                                 docs, llm, top_k=args.top_k, data_note=data_note)
     except (ValueError, FileNotFoundError, EmbeddingError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     print(answer.text)
+    return 0
+
+
+def _run_collect(args) -> int:
+    from src.monitoring.databricks_client import DatabricksClient, DatabricksError
+    from src.monitoring.live_collector import SNAPSHOT_PATH, collect_live, save_snapshot
+
+    path = args.snapshot or SNAPSHOT_PATH
+    try:
+        collection = collect_live(DatabricksClient.from_env(), max_runs=args.max_runs,
+                                  max_output_fetches=args.max_output_fetches)
+    except (ValueError, DatabricksError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    save_snapshot(collection, path)
+    print(f"[LIVE DATA] {len(collection.runs)} runs fetched at {fmt_time(collection.fetched_at)} | "
+          f"truncated {collection.truncated} | snapshot saved to {path}")
+    for w in collection.warnings:
+        print(f"  WARNING: {w}")
     return 0
 
 
@@ -113,19 +167,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         now = datetime.fromisoformat(args.now) if args.now else datetime.now(timezone.utc)
         if now.tzinfo is None:
             raise ValueError("--now must include a timezone, e.g. 2026-10-05T12:00:00+00:00")
-        loaded = load_mock_runs(args.data)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    if args.command == "collect":
+        return _run_collect(args)
+
+    try:
+        runs, banner_lines, data_note = _load_runs(args, now)
     except (ValueError, FileNotFoundError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
-    runs = loaded.runs
-    print(
-        f"[MOCK DATA] {len(runs)} runs loaded | "
-        f"{loaded.duplicates_dropped} duplicate dropped | "
-        f"{len(loaded.issues)} records rejected"
-    )
-    for issue in loaded.issues:
-        print(f"  load issue at index {issue.index} ({issue.run_id}): {issue.message}")
+    for line in banner_lines:
+        print(line)
     print()
 
     cmd = args.command
@@ -175,7 +231,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print_run_detail(r)
 
     elif cmd == "ask":
-        return _run_ask(args, now, runs)
+        return _run_ask(args, now, runs, data_note)
 
     return 0
 
