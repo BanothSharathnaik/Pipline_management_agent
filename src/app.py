@@ -61,8 +61,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--max-runs", type=int, default=100)
     s.add_argument("--max-output-fetches", type=int, default=20)
 
-    s = sub.add_parser("report", help="generate a deterministic incident report for a run")
+    s = sub.add_parser("report", help="generate an incident report for a run")
     s.add_argument("run_id")
+    s.add_argument("--no-llm", action="store_true", help="skip language model hypotheses generation")
     s.add_argument("--top-k", type=int, default=5)
 
     s = sub.add_parser("ask", help="ask a natural-language question")
@@ -244,6 +245,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 def _run_report(args, now: datetime, runs: Sequence[RunRecord], data_note: Optional[str]) -> int:
+    from src.generation.llm_client import OllamaClient
     from src.ingestion.parser import load_documents
     from src.reporting.incident_report import build_incident_report
 
@@ -263,11 +265,19 @@ def _run_report(args, now: datetime, runs: Sequence[RunRecord], data_note: Optio
     except Exception as exc:
         print(f"warning: could not load retrieval pipeline: {exc}", file=sys.stderr)
 
+    llm = None
+    if not args.no_llm:
+        try:
+            llm = OllamaClient.from_env()
+        except Exception as exc:
+            print(f"warning: could not connect to Ollama ({exc}); skipping model hypotheses", file=sys.stderr)
+
     report = build_incident_report(
         target_run=target,
         all_runs=runs,
         pipeline=pipeline,
         docs=docs,
+        llm=llm,
         now=now,
         data_note=data_note,
         top_k=args.top_k,

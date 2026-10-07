@@ -144,10 +144,70 @@ def test_build_report_for_success_run():
 
 
 def test_cli_report_subcommand(capsys):
-    exit_code = main(["report", "r2002"])
+    exit_code = main(["report", "--no-llm", "r2002"])
     assert exit_code == 0
     captured = capsys.readouterr()
     assert "# INCIDENT REPORT: Run r2002" in captured.out
     assert "## 1. Incident Header" in captured.out
     assert "## 5. Verbatim Error Message" in captured.out
     assert "## 8. Unconfirmed Claims & Unknowns" in captured.out
+
+
+class FakeReportLLM:
+    model = "mock-ollama-3"
+
+    def generate(self, system: str, user: str):
+        from src.generation.llm_client import LLMResponse
+        return LLMResponse(
+            text=(
+                "Verified facts\n- [F1] fact\n\n"
+                "Possible explanations (hypotheses)\n1. [H1] schema issue [E1]\n\n"
+                "What to investigate next\n- inspect schema [E1]\n\n"
+                "Limits\n- sample docs only [E1]"
+            ),
+            model="mock-ollama-3",
+            prompt_tokens=100,
+            completion_tokens=50,
+            done_reason="stop",
+            elapsed_s=0.1,
+            num_ctx=4096,
+        )
+
+
+def test_incident_report_with_llm():
+    from src.ingestion.chunker import Chunk
+    from src.retrieval.embeddings import HashingEmbedder
+    from src.retrieval.search import RetrievalPipeline
+    from src.retrieval.vector_index import VectorIndex
+
+    e = HashingEmbedder(dim=64)
+    idx = VectorIndex(e.dim, e.model_name)
+    target = next(r for r in MOCK_RUNS if r.run_id == "r2002")
+    chunk = Chunk(
+        chunk_id="TS-001#0",
+        doc_id="TS-001",
+        index=0,
+        text=target.error_message,
+        start_char=0,
+        end_char=len(target.error_message),
+        doc_type="troubleshooting",
+        source="mock",
+        origin="ts_001.txt",
+    )
+    vec = e.embed([chunk.text])
+    idx.add([chunk], vec)
+    pipe = RetrievalPipeline(idx, e, known_run_ids=["r2002"])
+
+    report = build_incident_report(
+        target_run=target,
+        all_runs=MOCK_RUNS,
+        pipeline=pipe,
+        llm=FakeReportLLM(),
+        now=NOW,
+    )
+
+    assert "## 10. Potential Root Causes & Hypotheses (Language Model — UNVERIFIED)" in report.text
+    assert "UNVERIFIED HYPOTHESES" in report.text
+    assert "mock-ollama-3" in report.text
+    assert "Section 10 below was synthesized by a language model as hypotheses and is UNVERIFIED." in report.text
+    assert report.llm_used is True
