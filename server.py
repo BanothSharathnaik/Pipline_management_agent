@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # Ensure repo root is on sys.path
@@ -59,6 +61,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files directory
+STATIC_DIR = ROOT / "static"
+if STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Global in-memory system instances
 runs_data: list[RunRecord] = []
@@ -151,7 +158,21 @@ def startup_event():
 # --- ENDPOINTS ---
 
 @app.get("/")
-def root():
+@app.get("/dashboard")
+def dashboard():
+    index_file = STATIC_DIR / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
+    return {
+        "status": "healthy",
+        "service": "PipelinePulse AI Backend",
+        "runs_count": len(runs_data),
+        "docs_count": len(docs),
+    }
+
+
+@app.get("/api/health")
+def health_check():
     return {
         "status": "healthy",
         "service": "PipelinePulse AI Backend",
